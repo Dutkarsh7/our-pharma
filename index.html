@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediSave OCR - Prescription Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+                :root {
+                    color-scheme: light;
+                    --app-bg-light: #f7fef9;
+                    --app-bg-dark: #020617;
+                }
+
+                body {
+                    font-family: 'Inter', sans-serif;
+                    background-color: var(--app-bg-light);
+                    color: #0f172a;
+                    transition: background-color 0.3s ease, color 0.3s ease;
+                }
+
+                html.dark {
+                    color-scheme: dark;
+                }
+
+                html.dark body {
+                    background-color: var(--app-bg-dark);
+                    color: #e2e8f0;
+                }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "recharts": "https://esm.sh/recharts@^3.7.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

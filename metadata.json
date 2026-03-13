@@ -1,0 +1,7 @@
+{
+  "name": "Copy of MediSave OCR - Prescription Assistant",
+  "description": "Scan medical prescriptions to find cheaper generic alternatives, compare prices, and calculate savings for chronic and general health issues.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

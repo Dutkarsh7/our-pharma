@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedScan AI - Medicine Price Analyzer</title>
+<script src="https://cdn.tailwindcss.com"><\/script>
+<style>
+body{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);min-height:100vh}
+.glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1)}
+.drop-zone{border:2px dashed rgba(139,92,246,0.5);transition:all 0.3s}
+.drag-over{border-color:#8b5cf6!important;background:rgba(139,92,246,0.1)!important}
+.spinner{border:3px solid rgba(139,92,246,0.3);border-top-color:#8b5cf6;border-radius:50%;width:44px;height:44px;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body class="text-white font-sans">
+<div class="max-w-4xl mx-auto px-4 py-10">
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-3 mb-3">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-2xl">💊</div>
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">MedScan AI</h1>
+    </div>
+    <p class="text-slate-400 text-lg">Upload a prescription to find affordable generic alternatives</p>
+  </div>
+  <div class="glass rounded-3xl p-8 mb-8">
+    <div id="dropZone" class="drop-zone rounded-2xl p-10 text-center cursor-pointer">
+      <div id="uploadPrompt">
+        <div class="text-5xl mb-4">📋</div>
+        <p class="text-xl font-semibold text-slate-200 mb-2">Drop prescription image here</p>
+        <p class="text-slate-400 mb-5">or click to browse</p>
+        <button onclick="document.getElementById('fileInput').click()" class="px-6 py-2 bg-violet-600 hover:bg-violet-500 rounded-xl text-sm font-medium transition-colors">Choose File</button>
+      </div>
+      <div id="previewContainer" class="hidden">
+        <img id="previewImg" src="" alt="Prescription preview" class="max-h-64 mx-auto rounded-xl mb-4 object-contain">
+        <p id="fileName" class="text-slate-300 text-sm"></p>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+    <button id="analyzeBtn" class="hidden mt-6 w-full py-4 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 rounded-2xl font-bold text-lg transition-all">
+      🔍 Analyze Prescription
+    </button>
+  </div>
+  <div id="loading" class="hidden glass rounded-3xl p-10 text-center mb-8">
+    <div class="spinner mb-4"></div>
+    <p class="text-violet-300 font-semibold text-lg">Analyzing with Gemini AI...</p>
+    <p class="text-slate-400 text-sm mt-1">Extracting medicines and finding alternatives</p>
+  </div>
+  <div id="errorBox" class="hidden glass rounded-3xl p-6 mb-8 border border-red-500/30 bg-red-500/10">
+    <p class="text-red-400 font-semibold">⚠️ <span id="errorMsg"></span></p>
+  </div>
+  <div id="results" class="hidden">
+    <div class="glass rounded-3xl p-6 mb-6">
+      <h2 class="text-2xl font-bold text-violet-300 mb-1">📊 Analysis Results</h2>
+      <p id="summaryText" class="text-slate-400 text-sm"></p>
+    </div>
+    <div id="medicineCards" class="space-y-4 mb-6"></div>
+    <div id="savingsSummary"></div>
+  </div>
+</div>
