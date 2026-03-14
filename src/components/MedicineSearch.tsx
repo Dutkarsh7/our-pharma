@@ -117,6 +117,10 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, theme, lan
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 pb-24 pt-10">
+      <div className="mb-4 rounded-xl border border-green-800 bg-green-950 p-3 text-xs text-green-400">
+        💊 Generic alternatives have identical active ingredients. AI accuracy ~95%. Consult your doctor before switching medicines.
+      </div>
+
       <div className={`rounded-2xl p-6 backdrop-blur-lg ${isDark ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-white shadow-sm'}`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

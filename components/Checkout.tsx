@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CartItem } from '../types';
 import type { Theme } from '../types';
 import OrderSuccess from './OrderSuccess';
+import DoctorConsult from './DoctorConsult';
+import { getSchedule } from '../src/data/drugSchedule';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -16,6 +18,18 @@ interface CheckoutProps {
 
 type Step = 'cart' | 'address' | 'payment';
 type PaymentState = 'idle' | 'processing' | 'done';
+
+interface CompletedOrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface CompletedOrder {
+  items: CompletedOrderItem[];
+  total: number;
+  savings: number;
+}
 
 const STEPS: Step[] = ['cart', 'address', 'payment'];
 const STEP_LABELS: Record<Step, string> = { cart: 'Cart', address: 'Delivery', payment: 'Payment' };
@@ -41,15 +55,87 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
   const [orderId, setOrderId] = useState('');
   const [address, setAddress] = useState({ name: '', phone: '', line: '', pincode: '' });
   const [selectedMethod, setSelectedMethod] = useState('Instant UPI Transfer');
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadedRxName, setUploadedRxName] = useState('');
+  const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
 
   const subtotal = cart.reduce((acc, item) => acc + item.genericPrice * item.quantity, 0);
   const brandedTotal = cart.reduce((acc, item) => acc + item.brandedPrice * item.quantity, 0);
   const savings = brandedTotal - subtotal;
   const deliveryFee = subtotal > 500 ? 0 : 49;
   const total = subtotal + deliveryFee;
+  const schedules = cart.map((item) => ({
+    item,
+    schedule: getSchedule(`${item.originalName} ${item.activeSalt} ${item.genericBrandName}`),
+  }));
+  const hasScheduleX = schedules.some(({ schedule }) => schedule === 'X');
+  const hasScheduleH = schedules.some(({ schedule }) => schedule === 'H' || schedule === 'H1');
+  const canProceedRestricted = !hasScheduleH || uploadedRxName.trim().length > 0;
+  const isBlocked = hasScheduleX || (hasScheduleH && !canProceedRestricted);
+
+  const printReceipt = () => {
+    if (!completedOrder) return;
+
+    const receipt = `
+    ================================
+    OurPharma - Order Receipt
+    ================================
+    Date: ${new Date().toLocaleDateString()}
+    Time: ${new Date().toLocaleTimeString()}
+    
+    Items Ordered:
+    ${completedOrder.items.map((item) => `${item.name} x${item.quantity} \n       — ₹${item.price}`).join('\n')}
+    
+    --------------------------------
+    Total: ₹${completedOrder.total}
+    Savings: ₹${completedOrder.savings} vs branded
+    ================================
+    AI Accuracy: ~95%
+    Always verify with pharmacist
+    ================================
+  `;
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(`
+      <html>
+        <head>
+          <title>OurPharma Receipt</title>
+          <style>
+            body {
+              font-family: monospace;
+              padding: 20px;
+              max-width: 400px;
+              margin: 0 auto;
+            }
+            h2 { color: #16a34a; }
+            button {
+              background: #16a34a;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              cursor: pointer;
+              border-radius: 8px;
+              margin-top: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>🏥 OurPharma Receipt</h2>
+          <pre>${receipt}</pre>
+          <button onclick="window.print()">
+            🖨️ Print Receipt
+          </button>
+        </body>
+      </html>
+    `);
+      win.document.close();
+    }
+  };
 
   // Save order to localStorage and transition to success
   const handlePayNow = () => {
+    if (isBlocked) return;
+
     setPaymentState('processing');
     const id = uid();
 
@@ -72,6 +158,15 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
         // storage unavailable — non-fatal for a college project
       }
 
+      setCompletedOrder({
+        items: cart.map((item) => ({
+          name: item.genericBrandName,
+          quantity: item.quantity,
+          price: item.genericPrice,
+        })),
+        total,
+        savings,
+      });
       setOrderId(id);
       setPaymentState('done');
       onClearCart();
@@ -87,8 +182,15 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.45, ease: 'easeOut' }}
+        className="mx-auto mt-10 max-w-5xl px-4 pb-20 sm:px-6"
       >
-        <OrderSuccess theme={theme} orderId={orderId} totalAmount={total} onGoHome={onClose} />
+        <OrderSuccess theme={theme} orderId={orderId} totalAmount={completedOrder?.total ?? total} onGoHome={onClose} />
+        <button
+          onClick={printReceipt}
+          className="mt-3 w-full rounded-xl border border-green-600 py-3 text-green-400 hover:bg-green-950"
+        >
+          🖨️ Print Receipt
+        </button>
       </motion.div>
     );
   }
@@ -161,6 +263,40 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* ─── Left column ─────────────────────────────────────────── */}
         <div className="lg:col-span-2 space-y-5">
+          {hasScheduleX && (
+            <div className="rounded-2xl border border-red-800 bg-red-950 p-5">
+              <p className="text-sm font-bold text-red-300">🚫 Cannot order online. Visit pharmacy.</p>
+              <p className="mt-2 text-xs text-red-200">Schedule X medicines need offline dispensing and pharmacist verification.</p>
+            </div>
+          )}
+
+          {!hasScheduleX && hasScheduleH && (
+            <div className="space-y-4 rounded-2xl border border-green-900 bg-[#0f1714] p-4">
+              <DoctorConsult onUploadRx={() => setShowUpload(true)} />
+              {showUpload && (
+                <div className="rounded-2xl border border-green-800 bg-green-950 p-4">
+                  <p className="mb-3 text-sm font-bold text-green-300">📋 Upload a valid prescription to continue checkout</p>
+                  <label className="flex cursor-pointer flex-col gap-3 rounded-xl border border-dashed border-green-700 bg-[#0B1F1C] p-4 text-sm text-green-200">
+                    <span>Select prescription image or PDF</span>
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        setUploadedRxName(file?.name ?? '');
+                      }}
+                    />
+                    <span className="inline-flex w-fit rounded-lg bg-green-600 px-3 py-2 font-bold text-white">Choose File</span>
+                  </label>
+                  {uploadedRxName && (
+                    <p className="mt-3 text-xs text-green-300">Uploaded prescription: {uploadedRxName}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <AnimatePresence mode="wait">
             {/* STEP 1 — Cart items */}
             {step === 'cart' && (
@@ -390,11 +526,23 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
                 <p className="text-xl font-black text-[#48BB78]">₹{savings.toLocaleString('en-IN')}</p>
               </div>
             )}
+
+            {hasScheduleH && !hasScheduleX && (
+              <div className="mt-5 rounded-2xl border border-green-800 bg-green-950 p-4 text-sm text-green-300">
+                Prescription medicines detected. Upload a valid Rx to continue.
+              </div>
+            )}
+
+            {hasScheduleX && (
+              <div className="mt-5 rounded-2xl border border-red-800 bg-red-950 p-4 text-sm text-red-300">
+                🚫 Cannot order online. Visit pharmacy.
+              </div>
+            )}
           </motion.div>
 
           {/* CTA button */}
           <motion.button
-            disabled={cart.length === 0 || paymentState === 'processing'}
+            disabled={cart.length === 0 || paymentState === 'processing' || isBlocked}
             onClick={() => {
               if (step === 'cart') setStep('address');
               else if (step === 'address') setStep('payment');
@@ -423,6 +571,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
             )}
             {paymentState === 'processing'
               ? 'Processing payment...'
+              : hasScheduleX
+                ? 'Blocked for Online Sale'
+                : hasScheduleH && !canProceedRestricted
+                  ? 'Upload Prescription to Continue'
               : step === 'cart'
                 ? 'Continue to Delivery'
                 : step === 'address'

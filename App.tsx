@@ -11,6 +11,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Auth from './components/Auth';
 import Checkout from './components/Checkout';
 import ProfileEditor from './components/ProfileEditor';
+import ExpertConsult from './components/ExpertConsult';
 import MedicineSearch from './src/components/MedicineSearch';
 import ChatBot from './components/ChatBot.tsx';
 import { Medicine as CatalogMedicine } from './src/data/medicines';
@@ -50,6 +51,7 @@ const translations = {
     pharma: "Pharmacist Checked",
     home: 'Home',
     medicines: 'Medicines',
+    experts: 'Experts',
     login: 'Login',
     logout: 'Logout',
     serviceability: '2-hour doorstep delivery is currently serviceable only in Gurgaon, Bangalore, Mumbai, and Gujarat hubs.',
@@ -64,6 +66,7 @@ const translations = {
     pharma: "फार्मासिस्ट द्वारा जाँचा गया",
     home: 'होम',
     medicines: 'दवाइयां',
+    experts: 'विशेषज्ञ',
     login: 'लॉगिन',
     logout: 'लॉगआउट',
     serviceability: '2 घंटे की डिलीवरी फिलहाल केवल गुड़गांव, बैंगलोर, मुंबई और गुजरात हब में उपलब्ध है।',
@@ -78,6 +81,7 @@ const translations = {
     pharma: "ফার্মাসিস্ট দ্বারা চেক করা",
     home: 'Home',
     medicines: 'Medicines',
+    experts: 'Experts',
     login: 'Login',
     logout: 'Logout',
     serviceability: '2-hour doorstep delivery is currently serviceable only in Gurgaon, Bangalore, Mumbai, and Gujarat hubs.',
@@ -92,6 +96,7 @@ const translations = {
     pharma: "फार्मसिस्टद्वारे तपासलेले",
     home: 'Home',
     medicines: 'Medicines',
+    experts: 'Experts',
     login: 'Login',
     logout: 'Logout',
     serviceability: '2-hour doorstep delivery is currently serviceable only in Gurgaon, Bangalore, Mumbai, and Gujarat hubs.',
@@ -106,6 +111,7 @@ const translations = {
     pharma: "ఫార్మసిస్ట్ తనిఖీ చేశారు",
     home: 'Home',
     medicines: 'Medicines',
+    experts: 'Experts',
     login: 'Login',
     logout: 'Logout',
     serviceability: '2-hour doorstep delivery is currently serviceable only in Gurgaon, Bangalore, Mumbai, and Gujarat hubs.',
@@ -120,6 +126,7 @@ const translations = {
     pharma: "மருந்தாளர் சரிபார்க்கப்பட்டது",
     home: 'Home',
     medicines: 'Medicines',
+    experts: 'Experts',
     login: 'Login',
     logout: 'Logout',
     serviceability: '2-hour doorstep delivery is currently serviceable only in Gurgaon, Bangalore, Mumbai, and Gujarat hubs.',
@@ -455,27 +462,36 @@ const App: React.FC = () => {
       
       <main className="flex-grow">
         <div className="mx-auto mt-6 flex max-w-7xl flex-wrap items-center gap-3 px-4 sm:px-6">
-          <div className={`relative flex min-h-11 rounded-full p-1 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-white shadow-sm'}`}>
-            <span
-              className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-full bg-[#00D084] transition-transform duration-300 ${
-                state.view === 'medicines' ? 'translate-x-[calc(100%+8px)]' : 'translate-x-0'
-              }`}
-            />
+          <div className={`grid min-h-11 grid-cols-3 rounded-full p-1 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-white shadow-sm'}`}>
             <button
               onClick={() => setView('landing')}
-              className={`relative min-h-11 min-w-32 rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest transition ${
-                state.view === 'landing' ? 'text-[#0B1F1C]' : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
+              className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
+                state.view === 'landing'
+                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
               {t.home}
             </button>
             <button
               onClick={() => setView('medicines')}
-              className={`relative min-h-11 min-w-32 rounded-full px-5 py-2 text-xs font-black uppercase tracking-widest transition ${
-                state.view === 'medicines' ? 'text-[#0B1F1C]' : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
+              className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
+                state.view === 'medicines'
+                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
               {t.medicines}
+            </button>
+            <button
+              onClick={() => setView('experts')}
+              className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
+                state.view === 'experts'
+                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
+              }`}
+            >
+              {t.experts}
             </button>
           </div>
           {session ? (
@@ -517,6 +533,12 @@ const App: React.FC = () => {
         {state.view === 'medicines' && (
           <motion.div key="medicines" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
             <MedicineSearch onAddToCart={handleAddCatalogToCart} theme={state.theme} language={state.language} />
+          </motion.div>
+        )}
+
+        {state.view === 'experts' && (
+          <motion.div key="experts" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
+            <ExpertConsult />
           </motion.div>
         )}
 
