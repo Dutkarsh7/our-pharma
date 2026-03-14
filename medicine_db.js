@@ -1,1 +1,490 @@
-﻿const medicineDatabase = [\n  {brand:"Crocin 650",generic:"Paracetamol 650mg",brandPrice:35,genericPrice:15},\n  {brand:"Augmentin 625",generic:"Amoxicillin 500mg + Clavulanic Acid 125mg",brandPrice:190,genericPrice:90},\n  {brand:"Glycomet 500",generic:"Metformin 500mg",brandPrice:28,genericPrice:12},\n  {brand:"Lantus Solostar",generic:"Insulin Glargine 100 IU/ml",brandPrice:1850,genericPrice:1400},\n  {brand:"Human Mixtard 70/30",generic:"Insulin Isophane 70% + Human Insulin 30%",brandPrice:650,genericPrice:480},\n  {brand:"Glycomet-GP 1",generic:"Metformin 500mg + Glimepiride 1mg",brandPrice:72,genericPrice:35},\n  {brand:"Telma 40",generic:"Telmisartan 40mg",brandPrice:85,genericPrice:38},\n  {brand:"Amlopres 5",generic:"Amlodipine 5mg",brandPrice:45,genericPrice:18},\n  {brand:"Storvas 10",generic:"Atorvastatin 10mg",brandPrice:95,genericPrice:42},\n  {brand:"Thyronorm 50",generic:"Levothyroxine Sodium 50mcg",brandPrice:75,genericPrice:32},\n  {brand:"Pantocid 40",generic:"Pantoprazole 40mg",brandPrice:110,genericPrice:48},\n  {brand:"Azithral 500",generic:"Azithromycin 500mg",brandPrice:126,genericPrice:85},\n  {brand:"Dolo 650",generic:"Paracetamol 650mg",brandPrice:30,genericPrice:12},\n  {brand:"Allegra 120",generic:"Fexofenadine 120mg",brandPrice:273,genericPrice:145},\n  {brand:"Lasix 40",generic:"Furosemide 40mg",brandPrice:18,genericPrice:8},\n  {brand:"Lopressor 50",generic:"Metoprolol 50mg",brandPrice:65,genericPrice:28},\n  {brand:"Cozaar 50",generic:"Losartan 50mg",brandPrice:145,genericPrice:68},\n  {brand:"Glucotrol 5",generic:"Glipizide 5mg",brandPrice:42,genericPrice:18},\n  {brand:"Zestril 5",generic:"Lisinopril 5mg",brandPrice:78,genericPrice:35},\n  {brand:"Cardace 2.5",generic:"Ramipril 2.5mg",brandPrice:88,genericPrice:42},\n  {brand:"Cipcal 500",generic:"Calcium Carbonate 500mg",brandPrice:65,genericPrice:28},\n  {brand:"Shelcal 500",generic:"Calcium Carbonate 500mg + Vitamin D3 250 IU",brandPrice:115,genericPrice:58},\n  {brand:"Becosules",generic:"Vitamin B Complex + Vitamin C",brandPrice:38,genericPrice:18},\n  {brand:"Neurobion Forte",generic:"Vitamin B1 + B6 + B12",brandPrice:42,genericPrice:22},\n  {brand:"Omez 20",generic:"Omeprazole 20mg",brandPrice:95,genericPrice:42},\n  {brand:"Ranitidine 150",generic:"Ranitidine 150mg",brandPrice:18,genericPrice:8},\n  {brand:"Domperidone 10",generic:"Domperidone 10mg",brandPrice:22,genericPrice:10},\n  {brand:"Ondem 4",generic:"Ondansetron 4mg",brandPrice:45,genericPrice:22},\n  {brand:"Disprin",generic:"Aspirin 325mg",brandPrice:12,genericPrice:5},\n  {brand:"Ecosprin 75",generic:"Aspirin 75mg",brandPrice:8,genericPrice:3},\n  {brand:"Clopivas 75",generic:"Clopidogrel 75mg",brandPrice:185,genericPrice:95},\n  {brand:"Eliquis 5",generic:"Apixaban 5mg",brandPrice:895,genericPrice:650},\n  {brand:"Warfarin 5",generic:"Warfarin Sodium 5mg",brandPrice:12,genericPrice:5},\n  {brand:"Combiflam",generic:"Ibuprofen 400mg + Paracetamol 325mg",brandPrice:28,genericPrice:15},\n  {brand:"Brufen 400",generic:"Ibuprofen 400mg",brandPrice:22,genericPrice:10},\n  {brand:"Voveran 50",generic:"Diclofenac 50mg",brandPrice:35,genericPrice:18},\n  {brand:"Aceclofenac 100",generic:"Aceclofenac 100mg",brandPrice:28,genericPrice:12},\n  {brand:"Zerodol P",generic:"Aceclofenac 100mg + Paracetamol 325mg",brandPrice:42,genericPrice:22},\n  {brand:"Tramadol 50",generic:"Tramadol 50mg",brandPrice:45,genericPrice:22},\n  {brand:"Gabapentin 300",generic:"Gabapentin 300mg",brandPrice:85,genericPrice:45},\n  {brand:"Pregabalin 75",generic:"Pregabalin 75mg",brandPrice:125,genericPrice:68},\n  {brand:"Levera 500",generic:"Levetiracetam 500mg",brandPrice:145,genericPrice:78},\n  {brand:"Phenytoin 100",generic:"Phenytoin Sodium 100mg",brandPrice:12,genericPrice:5},\n  {brand:"Valproate 500",generic:"Sodium Valproate 500mg",brandPrice:55,genericPrice:28},\n  {brand:"Carbamazepine 200",generic:"Carbamazepine 200mg",brandPrice:22,genericPrice:10},\n  {brand:"Clonazepam 0.5",generic:"Clonazepam 0.5mg",brandPrice:18,genericPrice:8},\n  {brand:"Alprazolam 0.5",generic:"Alprazolam 0.5mg",brandPrice:15,genericPrice:6},\n  {brand:"Lorazepam 2",generic:"Lorazepam 2mg",brandPrice:28,genericPrice:12},\n  {brand:"Diazepam 5",generic:"Diazepam 5mg",brandPrice:12,genericPrice:5},\n  {brand:"Escitalopram 10",generic:"Escitalopram 10mg",brandPrice:95,genericPrice:48},\n  {brand:"Fluoxetine 20",generic:"Fluoxetine 20mg",brandPrice:42,genericPrice:22},\n  {brand:"Sertraline 50",generic:"Sertraline 50mg",brandPrice:68,genericPrice:35},\n  {brand:"Paroxetine 20",generic:"Paroxetine 20mg",brandPrice:75,genericPrice:38},\n  {brand:"Venlafaxine 75",generic:"Venlafaxine 75mg",brandPrice:110,genericPrice:58},\n  {brand:"Duloxetine 30",generic:"Duloxetine 30mg",brandPrice:185,genericPrice:95},\n  {brand:"Amitriptyline 25",generic:"Amitriptyline 25mg",brandPrice:18,genericPrice:8},\n  {brand:"Quetiapine 100",generic:"Quetiapine 100mg",brandPrice:125,genericPrice:68},\n  {brand:"Olanzapine 10",generic:"Olanzapine 10mg",brandPrice:145,genericPrice:78},\n  {brand:"Risperidone 2",generic:"Risperidone 2mg",brandPrice:85,genericPrice:45},\n  {brand:"Aripiprazole 10",generic:"Aripiprazole 10mg",brandPrice:165,genericPrice:88},\n  {brand:"Donepezil 5",generic:"Donepezil 5mg",brandPrice:195,genericPrice:105},\n  {brand:"Rivastigmine 1.5",generic:"Rivastigmine 1.5mg",brandPrice:145,genericPrice:78},\n  {brand:"Memantine 10",generic:"Memantine 10mg",brandPrice:185,genericPrice:98},\n  {brand:"Pramipexole 0.5",generic:"Pramipexole 0.5mg",brandPrice:125,genericPrice:68},\n  {brand:"Levodopa + Carbidopa",generic:"Levodopa 100mg + Carbidopa 25mg",brandPrice:95,genericPrice:48},\n  {brand:"Ropinirole 2",generic:"Ropinirole 2mg",brandPrice:145,genericPrice:75},\n  {brand:"Selegiline 5",generic:"Selegiline 5mg",brandPrice:85,genericPrice:45},\n  {brand:"Salbutamol Inhaler",generic:"Salbutamol 100mcg",brandPrice:145,genericPrice:78},\n  {brand:"Budecort Inhaler",generic:"Budesonide 200mcg",brandPrice:385,genericPrice:225},\n  {brand:"Seroflo Inhaler",generic:"Fluticasone 250mcg + Salmeterol 25mcg",brandPrice:625,genericPrice:425},\n  {brand:"Duolin Inhaler",generic:"Ipratropium 20mcg + Salbutamol 100mcg",brandPrice:295,genericPrice:185},\n  {brand:"Deriphyllin",generic:"Theophylline 300mg",brandPrice:42,genericPrice:22},\n  {brand:"Montelukast 10",generic:"Montelukast 10mg",brandPrice:85,genericPrice:45},\n  {brand:"Cetirizine 10",generic:"Cetirizine 10mg",brandPrice:15,genericPrice:6},\n  {brand:"Levocetirizine 5",generic:"Levocetirizine 5mg",brandPrice:28,genericPrice:12},\n  {brand:"Chlorpheniramine 4",generic:"Chlorpheniramine 4mg",brandPrice:8,genericPrice:3},\n  {brand:"Pheniramine 25",generic:"Pheniramine 25mg",brandPrice:12,genericPrice:5},\n  {brand:"Hydroxyzine 25",generic:"Hydroxyzine 25mg",brandPrice:106,genericPrice:58},\n  {brand:"Prednisolone 10",generic:"Prednisolone 10mg",brandPrice:18,genericPrice:8},\n  {brand:"Dexamethasone 4",generic:"Dexamethasone 4mg",brandPrice:22,genericPrice:10},\n  {brand:"Methylprednisolone 16",generic:"Methylprednisolone 16mg",brandPrice:95,genericPrice:48},\n  {brand:"Hydrocortisone 10",generic:"Hydrocortisone 10mg",brandPrice:35,genericPrice:18},\n  {brand:"Fludrocortisone 0.1",generic:"Fludrocortisone 0.1mg",brandPrice:125,genericPrice:68},\n  {brand:"Spironolactone 25",generic:"Spironolactone 25mg",brandPrice:22,genericPrice:10},\n  {brand:"Hydrochlorothiazide 12.5",generic:"Hydrochlorothiazide 12.5mg",brandPrice:12,genericPrice:5},\n  {brand:"Chlorthalidone 12.5",generic:"Chlorthalidone 12.5mg",brandPrice:18,genericPrice:8},\n  {brand:"Indapamide 2.5",generic:"Indapamide 2.5mg",brandPrice:42,genericPrice:22},\n  {brand:"Digoxin 0.25",generic:"Digoxin 0.25mg",brandPrice:8,genericPrice:3},\n  {brand:"Ivabradine 5",generic:"Ivabradine 5mg",brandPrice:185,genericPrice:95},\n  {brand:"Nitroglycerin 2.6",generic:"Nitroglycerin 2.6mg",brandPrice:22,genericPrice:10},\n  {brand:"Isosorbide Dinitrate 10",generic:"Isosorbide Dinitrate 10mg",brandPrice:18,genericPrice:8},\n  {brand:"Isosorbide Mononitrate 20",generic:"Isosorbide Mononitrate 20mg",brandPrice:28,genericPrice:12},\n  {brand:"Rosuvastatin 10",generic:"Rosuvastatin 10mg",brandPrice:145,genericPrice:75},\n  {brand:"Simvastatin 20",generic:"Simvastatin 20mg",brandPrice:55,genericPrice:28},\n  {brand:"Pravastatin 40",generic:"Pravastatin 40mg",brandPrice:95,genericPrice:48},\n  {brand:"Fenofibrate 145",generic:"Fenofibrate 145mg",brandPrice:125,genericPrice:68},\n  {brand:"Gemfibrozil 600",generic:"Gemfibrozil 600mg",brandPrice:85,genericPrice:45},\n  {brand:"Ezetimibe 10",generic:"Ezetimibe 10mg",brandPrice:165,genericPrice:88},\n  {brand:"Allopurinol 100",generic:"Allopurinol 100mg",brandPrice:12,genericPrice:5},\n  {brand:"Febuxostat 40",generic:"Febuxostat 40mg",brandPrice:185,genericPrice:95},\n  {brand:"Colchicine 0.5",generic:"Colchicine 0.5mg",brandPrice:45,genericPrice:22},\n  {brand:"Methotrexate 7.5",generic:"Methotrexate 7.5mg",brandPrice:85,genericPrice:45},\n  {brand:"Hydroxychloroquine 200",generic:"Hydroxychloroquine 200mg",brandPrice:42,genericPrice:22},\n  {brand:"Sulfasalazine 500",generic:"Sulfasalazine 500mg",brandPrice:28,genericPrice:12},\n  {brand:"Mesalamine 400",generic:"Mesalamine 400mg",brandPrice:145,genericPrice:75},\n  {brand:"Azathioprine 50",generic:"Azathioprine 50mg",brandPrice:55,genericPrice:28},\n  {brand:"Cyclosporine 25",generic:"Cyclosporine 25mg",brandPrice:185,genericPrice:95},\n  {brand:"Tacrolimus 1",generic:"Tacrolimus 1mg",brandPrice:295,genericPrice:165},\n  {brand:"Mycophenolate 500",generic:"Mycophenolate Mofetil 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Alendronate 70",generic:"Alendronate 70mg",brandPrice:95,genericPrice:48},\n  {brand:"Risedronate 35",generic:"Risedronate 35mg",brandPrice:145,genericPrice:75},\n  {brand:"Ibandronate 150",generic:"Ibandronate 150mg",brandPrice:385,genericPrice:225},\n  {brand:"Raloxifene 60",generic:"Raloxifene 60mg",brandPrice:165,genericPrice:88},\n  {brand:"Teriparatide Injection",generic:"Teriparatide 20mcg",brandPrice:6500,genericPrice:5200},\n  {brand:"Calcitriol 0.25",generic:"Calcitriol 0.25mcg",brandPrice:45,genericPrice:22},\n  {brand:"Alfacalcidol 0.25",generic:"Alfacalcidol 0.25mcg",brandPrice:55,genericPrice:28},\n  {brand:"Finasteride 5",generic:"Finasteride 5mg",brandPrice:85,genericPrice:45},\n  {brand:"Dutasteride 0.5",generic:"Dutasteride 0.5mg",brandPrice:145,genericPrice:75},\n  {brand:"Tamsulosin 0.4",generic:"Tamsulosin 0.4mg",brandPrice:95,genericPrice:48},\n  {brand:"Sildenafil 50",generic:"Sildenafil 50mg",brandPrice:145,genericPrice:75},\n  {brand:"Tadalafil 10",generic:"Tadalafil 10mg",brandPrice:185,genericPrice:95},\n  {brand:"Vardenafil 10",generic:"Vardenafil 10mg",brandPrice:225,genericPrice:125},\n  {brand:"Norethisterone 5",generic:"Norethisterone 5mg",brandPrice:42,genericPrice:22},\n  {brand:"Tranexamic Acid 500",generic:"Tranexamic Acid 500mg",brandPrice:55,genericPrice:28},\n  {brand:"Mefenamic Acid 500",generic:"Mefenamic Acid 500mg",brandPrice:28,genericPrice:12},\n  {brand:"Ethinyl Estradiol + Levonorgestrel",generic:"Ethinyl Estradiol 0.03mg + Levonorgestrel 0.15mg",brandPrice:145,genericPrice:75},\n  {brand:"Medroxyprogesterone 10",generic:"Medroxyprogesterone 10mg",brandPrice:55,genericPrice:28},\n  {brand:"Clomiphene 50",generic:"Clomiphene Citrate 50mg",brandPrice:125,genericPrice:68},\n  {brand:"Letrozole 2.5",generic:"Letrozole 2.5mg",brandPrice:165,genericPrice:88},\n  {brand:"Tamoxifen 20",generic:"Tamoxifen 20mg",brandPrice:95,genericPrice:48},\n  {brand:"Iron Folic Acid",generic:"Ferrous Sulfate 150mg + Folic Acid 0.5mg",brandPrice:18,genericPrice:8},\n  {brand:"Ferrous Sulfate 325",generic:"Ferrous Sulfate 325mg",brandPrice:12,genericPrice:5},\n  {brand:"Ferrous Fumarate 200",generic:"Ferrous Fumarate 200mg",brandPrice:18,genericPrice:8},\n  {brand:"Vitamin B12 1500mcg",generic:"Methylcobalamin 1500mcg",brandPrice:85,genericPrice:45},\n  {brand:"Folic Acid 5",generic:"Folic Acid 5mg",brandPrice:8,genericPrice:3},\n  {brand:"Vitamin D3 60000 IU",generic:"Cholecalciferol 60000 IU",brandPrice:42,genericPrice:22},\n  {brand:"Vitamin C 500",generic:"Ascorbic Acid 500mg",brandPrice:18,genericPrice:8},\n  {brand:"Multivitamin",generic:"Multivitamin + Multimineral",brandPrice:95,genericPrice:48},\n  {brand:"Omega-3 1000",generic:"Omega-3 Fatty Acids 1000mg",brandPrice:125,genericPrice:68},\n  {brand:"Coenzyme Q10 100",generic:"Coenzyme Q10 100mg",brandPrice:185,genericPrice:95},\n  {brand:"Gliclazide 80",generic:"Gliclazide 80mg",brandPrice:42,genericPrice:22},\n  {brand:"Glibenclamide 5",generic:"Glibenclamide 5mg",brandPrice:12,genericPrice:5},\n  {brand:"Pioglitazone 15",generic:"Pioglitazone 15mg",brandPrice:55,genericPrice:28},\n  {brand:"Sitagliptin 100",generic:"Sitagliptin 100mg",brandPrice:185,genericPrice:95},\n  {brand:"Vildagliptin 50",generic:"Vildagliptin 50mg",brandPrice:145,genericPrice:75},\n  {brand:"Saxagliptin 5",generic:"Saxagliptin 5mg",brandPrice:225,genericPrice:125},\n  {brand:"Empagliflozin 10",generic:"Empagliflozin 10mg",brandPrice:385,genericPrice:225},\n  {brand:"Dapagliflozin 10",generic:"Dapagliflozin 10mg",brandPrice:385,genericPrice:225},\n  {brand:"Canagliflozin 100",generic:"Canagliflozin 100mg",brandPrice:425,genericPrice:245},\n  {brand:"Liraglutide Injection",generic:"Liraglutide 6mg/ml",brandPrice:4500,genericPrice:3800},\n  {brand:"Exenatide Injection",generic:"Exenatide 5mcg",brandPrice:2850,genericPrice:2200},\n  {brand:"Insulin Aspart",generic:"Insulin Aspart 100 IU/ml",brandPrice:1450,genericPrice:1150},\n  {brand:"Insulin Lispro",generic:"Insulin Lispro 100 IU/ml",brandPrice:1550,genericPrice:1250},\n  {brand:"Insulin Detemir",generic:"Insulin Detemir 100 IU/ml",brandPrice:1850,genericPrice:1450},\n  {brand:"Insulin Degludec",generic:"Insulin Degludec 100 IU/ml",brandPrice:2250,genericPrice:1850},\n  {brand:"Acarbose 50",generic:"Acarbose 50mg",brandPrice:85,genericPrice:45},\n  {brand:"Voglibose 0.3",generic:"Voglibose 0.3mg",brandPrice:95,genericPrice:48},\n  {brand:"Repaglinide 1",generic:"Repaglinide 1mg",brandPrice:125,genericPrice:68},\n  {brand:"Nateglinide 120",generic:"Nateglinide 120mg",brandPrice:145,genericPrice:75},\n  {brand:"Chloroquine 250",generic:"Chloroquine Phosphate 250mg",brandPrice:18,genericPrice:8},\n  {brand:"Primaquine 15",generic:"Primaquine 15mg",brandPrice:22,genericPrice:10},\n  {brand:"Artemether + Lumefantrine",generic:"Artemether 20mg + Lumefantrine 120mg",brandPrice:185,genericPrice:95},\n  {brand:"Ciprofloxacin 500",generic:"Ciprofloxacin 500mg",brandPrice:28,genericPrice:12},\n  {brand:"Levofloxacin 500",generic:"Levofloxacin 500mg",brandPrice:85,genericPrice:45},\n  {brand:"Ofloxacin 200",generic:"Ofloxacin 200mg",brandPrice:22,genericPrice:10},\n  {brand:"Norfloxacin 400",generic:"Norfloxacin 400mg",brandPrice:18,genericPrice:8},\n  {brand:"Cefixime 200",generic:"Cefixime 200mg",brandPrice:85,genericPrice:45},\n  {brand:"Ceftriaxone 1g Injection",generic:"Ceftriaxone 1g",brandPrice:45,genericPrice:22},\n  {brand:"Cefotaxime 1g Injection",generic:"Cefotaxime 1g",brandPrice:38,genericPrice:18},\n  {brand:"Ampicillin 500",generic:"Ampicillin 500mg",brandPrice:18,genericPrice:8},\n  {brand:"Cloxacillin 500",generic:"Cloxacillin 500mg",brandPrice:22,genericPrice:10},\n  {brand:"Doxycycline 100",generic:"Doxycycline 100mg",brandPrice:28,genericPrice:12},\n  {brand:"Erythromycin 500",generic:"Erythromycin 500mg",brandPrice:22,genericPrice:10},\n  {brand:"Clarithromycin 500",generic:"Clarithromycin 500mg",brandPrice:145,genericPrice:75},\n  {brand:"Roxithromycin 150",generic:"Roxithromycin 150mg",brandPrice:85,genericPrice:45},\n  {brand:"Metronidazole 400",generic:"Metronidazole 400mg",brandPrice:12,genericPrice:5},\n  {brand:"Tinidazole 500",generic:"Tinidazole 500mg",brandPrice:18,genericPrice:8},\n  {brand:"Nitrofurantoin 100",generic:"Nitrofurantoin 100mg",brandPrice:42,genericPrice:22},\n  {brand:"Cephalexin 500",generic:"Cephalexin 500mg",brandPrice:28,genericPrice:12},\n  {brand:"Cotrimoxazole 480",generic:"Sulfamethoxazole 400mg + Trimethoprim 80mg",brandPrice:12,genericPrice:5},\n  {brand:"Linezolid 600",generic:"Linezolid 600mg",brandPrice:385,genericPrice:225},\n  {brand:"Vancomycin 500mg Injection",generic:"Vancomycin 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Piperacillin + Tazobactam 4.5g",generic:"Piperacillin 4g + Tazobactam 0.5g",brandPrice:425,genericPrice:245},\n  {brand:"Meropenem 1g Injection",generic:"Meropenem 1g",brandPrice:1850,genericPrice:1250},\n  {brand:"Imipenem + Cilastatin 500mg",generic:"Imipenem 500mg + Cilastatin 500mg",brandPrice:1650,genericPrice:1150},\n  {brand:"Fluconazole 150",generic:"Fluconazole 150mg",brandPrice:42,genericPrice:22},\n  {brand:"Itraconazole 100",generic:"Itraconazole 100mg",brandPrice:125,genericPrice:68},\n  {brand:"Ketoconazole 200",generic:"Ketoconazole 200mg",brandPrice:45,genericPrice:22},\n  {brand:"Clotrimazole Cream",generic:"Clotrimazole 1%",brandPrice:28,genericPrice:12},\n  {brand:"Miconazole Cream",generic:"Miconazole 2%",brandPrice:35,genericPrice:18},\n  {brand:"Terbinafine 250",generic:"Terbinafine 250mg",brandPrice:145,genericPrice:75},\n  {brand:"Griseofulvin 500",generic:"Griseofulvin 500mg",brandPrice:85,genericPrice:45},\n  {brand:"Acyclovir 400",generic:"Acyclovir 400mg",brandPrice:85,genericPrice:45},\n  {brand:"Valacyclovir 500",generic:"Valacyclovir 500mg",brandPrice:185,genericPrice:95},\n  {brand:"Oseltamivir 75",generic:"Oseltamivir 75mg",brandPrice:145,genericPrice:75},\n  {brand:"Ribavirin 200",generic:"Ribavirin 200mg",brandPrice:385,genericPrice:225},\n  {brand:"Tenofovir 300",generic:"Tenofovir Disoproxil 300mg",brandPrice:285,genericPrice:165},\n  {brand:"Lamivudine 150",generic:"Lamivudine 150mg",brandPrice:125,genericPrice:68},\n  {brand:"Efavirenz 600",generic:"Efavirenz 600mg",brandPrice:225,genericPrice:125},\n  {brand:"Nevirapine 200",generic:"Nevirapine 200mg",brandPrice:95,genericPrice:48},\n  {brand:"Zidovudine 300",generic:"Zidovudine 300mg",brandPrice:165,genericPrice:88},\n  {brand:"Atazanavir 300",generic:"Atazanavir 300mg",brandPrice:385,genericPrice:225},\n  {brand:"Darunavir 600",generic:"Darunavir 600mg",brandPrice:625,genericPrice:425},\n  {brand:"Raltegravir 400",generic:"Raltegravir 400mg",brandPrice:485,genericPrice:285},\n  {brand:"Dolutegravir 50",generic:"Dolutegravir 50mg",brandPrice:285,genericPrice:165},\n  {brand:"Sofosbuvir 400",generic:"Sofosbuvir 400mg",brandPrice:12500,genericPrice:8500},\n  {brand:"Daclatasvir 60",generic:"Daclatasvir 60mg",brandPrice:8500,genericPrice:6200},\n  {brand:"Albendazole 400",generic:"Albendazole 400mg",brandPrice:8,genericPrice:3},\n  {brand:"Mebendazole 100",generic:"Mebendazole 100mg",brandPrice:12,genericPrice:5},\n  {brand:"Ivermectin 12",generic:"Ivermectin 12mg",brandPrice:22,genericPrice:10},\n  {brand:"Praziquantel 600",generic:"Praziquantel 600mg",brandPrice:85,genericPrice:45},\n  {brand:"Permethrin Lotion",generic:"Permethrin 5%",brandPrice:145,genericPrice:75},\n  {brand:"Lindane Lotion",generic:"Lindane 1%",brandPrice:85,genericPrice:45},\n  {brand:"Povidone Iodine",generic:"Povidone Iodine 10%",brandPrice:42,genericPrice:22},\n  {brand:"Chlorhexidine Solution",generic:"Chlorhexidine Gluconate 0.2%",brandPrice:55,genericPrice:28},\n  {brand:"Hydrogen Peroxide",generic:"Hydrogen Peroxide 3%",brandPrice:18,genericPrice:8},\n  {brand:"Silver Sulfadiazine Cream",generic:"Silver Sulfadiazine 1%",brandPrice:125,genericPrice:68},\n  {brand:"Mupirocin Ointment",generic:"Mupirocin 2%",brandPrice:165,genericPrice:88},\n  {brand:"Fusidic Acid Cream",generic:"Fusidic Acid 2%",brandPrice:145,genericPrice:75},\n  {brand:"Hydroquinone Cream",generic:"Hydroquinone 2%",brandPrice:185,genericPrice:95},\n  {brand:"Tretinoin Cream",generic:"Tretinoin 0.025%",brandPrice:225,genericPrice:125},\n  {brand:"Adapalene Gel",generic:"Adapalene 0.1%",brandPrice:285,genericPrice:165},\n  {brand:"Benzoyl Peroxide Gel",generic:"Benzoyl Peroxide 2.5%",brandPrice:145,genericPrice:75},\n  {brand:"Clindamycin Gel",generic:"Clindamycin 1%",brandPrice:165,genericPrice:88},\n  {brand:"Salicylic Acid Cream",generic:"Salicylic Acid 2%",brandPrice:95,genericPrice:48},\n  {brand:"Tacrolimus Ointment",generic:"Tacrolimus 0.1%",brandPrice:625,genericPrice:425},\n  {brand:"Pimecrolimus Cream",generic:"Pimecrolimus 1%",brandPrice:485,genericPrice:285},\n  {brand:"Betamethasone Cream",generic:"Betamethasone 0.1%",brandPrice:55,genericPrice:28},\n  {brand:"Clobetasol Cream",generic:"Clobetasol 0.05%",brandPrice:125,genericPrice:68},\n  {brand:"Mometasone Cream",generic:"Mometasone 0.1%",brandPrice:95,genericPrice:48},\n  {brand:"Calamine Lotion",generic:"Calamine 8%",brandPrice:22,genericPrice:10},\n  {brand:"Vitamin E Cream",generic:"Vitamin E 400 IU",brandPrice:85,genericPrice:45},\n  {brand:"Petroleum Jelly",generic:"White Petroleum 100%",brandPrice:28,genericPrice:12},\n  {brand:"Urea Cream",generic:"Urea 10%",brandPrice:125,genericPrice:68},\n  {brand:"Lactic Acid Lotion",generic:"Lactic Acid 12%",brandPrice:145,genericPrice:75},\n  {brand:"Coal Tar Shampoo",generic:"Coal Tar 2%",brandPrice:165,genericPrice:88},\n  {brand:"Ketoconazole Shampoo",generic:"Ketoconazole 2%",brandPrice:225,genericPrice:125},\n  {brand:"Minoxidil Solution",generic:"Minoxidil 5%",brandPrice:485,genericPrice:285},\n  {brand:"Finasteride 1",generic:"Finasteride 1mg",brandPrice:185,genericPrice:95},\n  {brand:"Isotretinoin 20",generic:"Isotretinoin 20mg",brandPrice:385,genericPrice:225},\n  {brand:"Pilocarpine Eye Drops",generic:"Pilocarpine 2%",brandPrice:145,genericPrice:75},\n  {brand:"Timolol Eye Drops",generic:"Timolol 0.5%",brandPrice:185,genericPrice:95},\n  {brand:"Latanoprost Eye Drops",generic:"Latanoprost 0.005%",brandPrice:425,genericPrice:245},\n  {brand:"Brimonidine Eye Drops",generic:"Brimonidine 0.2%",brandPrice:285,genericPrice:165},\n  {brand:"Carteolol Eye Drops",generic:"Carteolol 1%",brandPrice:225,genericPrice:125},\n  {brand:"Tropicamide Eye Drops",generic:"Tropicamide 1%",brandPrice:95,genericPrice:48},\n  {brand:"Cyclopentolate Eye Drops",generic:"Cyclopentolate 1%",brandPrice:125,genericPrice:68},\n  {brand:"Tetracycline Eye Ointment",generic:"Tetracycline 1%",brandPrice:35,genericPrice:18},\n  {brand:"Chloramphenicol Eye Drops",generic:"Chloramphenicol 0.5%",brandPrice:28,genericPrice:12},\n  {brand:"Moxifloxacin Eye Drops",generic:"Moxifloxacin 0.5%",brandPrice:185,genericPrice:95},\n  {brand:"Artificial Tears",generic:"Carboxymethylcellulose 0.5%",brandPrice:125,genericPrice:68},\n  {brand:"Sodium Hyaluronate Eye Drops",generic:"Sodium Hyaluronate 0.1%",brandPrice:225,genericPrice:125},\n  {brand:"Prednisolone Eye Drops",generic:"Prednisolone Acetate 1%",brandPrice:165,genericPrice:88},\n  {brand:"Dexamethasone Eye Drops",generic:"Dexamethasone 0.1%",brandPrice:145,genericPrice:75},\n  {brand:"Olopatadine Eye Drops",generic:"Olopatadine 0.1%",brandPrice:285,genericPrice:165},\n  {brand:"Ketotifen Eye Drops",generic:"Ketotifen 0.025%",brandPrice:145,genericPrice:75},\n  {brand:"Ciprofloxacin Ear Drops",generic:"Ciprofloxacin 0.3%",brandPrice:85,genericPrice:45},\n  {brand:"Ofloxacin Ear Drops",generic:"Ofloxacin 0.3%",brandPrice:95,genericPrice:48},\n  {brand:"Hydrogen Peroxide Ear Drops",generic:"Hydrogen Peroxide 6.5%",brandPrice:55,genericPrice:28},\n  {brand:"Glycerin Ear Drops",generic:"Glycerin",brandPrice:42,genericPrice:22},\n  {brand:"Sodium Bicarbonate Ear Drops",generic:"Sodium Bicarbonate 5%",brandPrice:38,genericPrice:18},\n  {brand:"Betahistine 16",generic:"Betahistine 16mg",brandPrice:95,genericPrice:48},\n  {brand:"Cinnarizine 25",generic:"Cinnarizine 25mg",brandPrice:18,genericPrice:8},\n  {brand:"Meclizine 25",generic:"Meclizine 25mg",brandPrice:28,genericPrice:12},\n  {brand:"Dimenhydrinate 50",generic:"Dimenhydrinate 50mg",brandPrice:22,genericPrice:10},\n  {brand:"Scopolamine Patch",generic:"Scopolamine 1.5mg",brandPrice:425,genericPrice:245},\n  {brand:"Oral Rehydration Salts",generic:"ORS Powder",brandPrice:8,genericPrice:3},\n  {brand:"Loperamide 2",generic:"Loperamide 2mg",brandPrice:18,genericPrice:8},\n  {brand:"Racecadotril 100",generic:"Racecadotril 100mg",brandPrice:85,genericPrice:45},\n  {brand:"Probiotics",generic:"Lactobacillus + Bifidobacterium",brandPrice:185,genericPrice:95},\n  {brand:"Zinc Sulfate 20",generic:"Zinc Sulfate 20mg",brandPrice:12,genericPrice:5},\n  {brand:"Magnesium Hydroxide",generic:"Magnesium Hydroxide 400mg",brandPrice:28,genericPrice:12},\n  {brand:"Lactulose Solution",generic:"Lactulose 10g/15ml",brandPrice:125,genericPrice:68},\n  {brand:"Polyethylene Glycol",generic:"Polyethylene Glycol 3350",brandPrice:285,genericPrice:165},\n  {brand:"Bisacodyl 5",generic:"Bisacodyl 5mg",brandPrice:18,genericPrice:8},\n  {brand:"Senna 8.6",generic:"Sennosides 8.6mg",brandPrice:15,genericPrice:6},\n  {brand:"Docusate Sodium 100",generic:"Docusate Sodium 100mg",brandPrice:28,genericPrice:12},\n  {brand:"Simethicone 40",generic:"Simethicone 40mg",brandPrice:22,genericPrice:10},\n  {brand:"Activated Charcoal",generic:"Activated Charcoal 250mg",brandPrice:42,genericPrice:22},\n  {brand:"Ursodeoxycholic Acid 300",generic:"Ursodeoxycholic Acid 300mg",brandPrice:225,genericPrice:125},\n  {brand:"Silymarin 140",generic:"Silymarin 140mg",brandPrice:145,genericPrice:75},\n  {brand:"N-Acetylcysteine 600",generic:"N-Acetylcysteine 600mg",brandPrice:125,genericPrice:68},\n  {brand:"Ambroxol 30",generic:"Ambroxol 30mg",brandPrice:28,genericPrice:12},\n  {brand:"Bromhexine 8",generic:"Bromhexine 8mg",brandPrice:22,genericPrice:10},\n  {brand:"Guaifenesin 200",generic:"Guaifenesin 200mg",brandPrice:42,genericPrice:22},\n  {brand:"Dextromethorphan 10",generic:"Dextromethorphan 10mg",brandPrice:35,genericPrice:18},\n  {brand:"Codeine 10",generic:"Codeine Phosphate 10mg",brandPrice:28,genericPrice:12},\n  {brand:"Diphenhydramine 25",generic:"Diphenhydramine 25mg",brandPrice:18,genericPrice:8},\n  {brand:"Pseudoephedrine 30",generic:"Pseudoephedrine 30mg",brandPrice:22,genericPrice:10},\n  {brand:"Phenylephrine 10",generic:"Phenylephrine 10mg",brandPrice:18,genericPrice:8},\n  {brand:"Xylometazoline Nasal Spray",generic:"Xylometazoline 0.1%",brandPrice:85,genericPrice:45},\n  {brand:"Oxymetazoline Nasal Spray",generic:"Oxymetazoline 0.05%",brandPrice:95,genericPrice:48},\n  {brand:"Sodium Chloride Nasal Spray",generic:"Sodium Chloride 0.9%",brandPrice:65,genericPrice:35},\n  {brand:"Fluticasone Nasal Spray",generic:"Fluticasone Propionate 50mcg",brandPrice:385,genericPrice:225},\n  {brand:"Mometasone Nasal Spray",generic:"Mometasone Furoate 50mcg",brandPrice:425,genericPrice:245},\n  {brand:"Azelastine Nasal Spray",generic:"Azelastine 0.1%",brandPrice:485,genericPrice:285},\n  {brand:"Ipratropium Nasal Spray",generic:"Ipratropium 0.03%",brandPrice:325,genericPrice:185},\n  {brand:"Melatonin 3",generic:"Melatonin 3mg",brandPrice:285,genericPrice:165},\n  {brand:"Zolpidem 10",generic:"Zolpidem 10mg",brandPrice:125,genericPrice:68},\n  {brand:"Eszopiclone 2",generic:"Eszopiclone 2mg",brandPrice:225,genericPrice:125},\n  {brand:"Zaleplon 10",generic:"Zaleplon 10mg",brandPrice:185,genericPrice:95},\n  {brand:"Ramelteon 8",generic:"Ramelteon 8mg",brandPrice:385,genericPrice:225},\n  {brand:"Modafinil 100",generic:"Modafinil 100mg",brandPrice:485,genericPrice:285},\n  {brand:"Atomoxetine 40",generic:"Atomoxetine 40mg",brandPrice:625,genericPrice:425},\n  {brand:"Methylphenidate 10",generic:"Methylphenidate 10mg",brandPrice:285,genericPrice:165},\n  {brand:"Lisdexamfetamine 30",generic:"Lisdexamfetamine 30mg",brandPrice:825,genericPrice:625},\n  {brand:"Baclofen 10",generic:"Baclofen 10mg",brandPrice:28,genericPrice:12},\n  {brand:"Tizanidine 2",generic:"Tizanidine 2mg",brandPrice:85,genericPrice:45},\n  {brand:"Chlorzoxazone 250",generic:"Chlorzoxazone 250mg",brandPrice:22,genericPrice:10},\n  {brand:"Methocarbamol 500",generic:"Methocarbamol 500mg",brandPrice:42,genericPrice:22},\n  {brand:"Cyclobenzaprine 5",generic:"Cyclobenzaprine 5mg",brandPrice:55,genericPrice:28},\n  {brand:"Thiocolchicoside 4",generic:"Thiocolchicoside 4mg",brandPrice:35,genericPrice:18},\n  {brand:"Glucosamine 500",generic:"Glucosamine Sulfate 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Chondroitin 400",generic:"Chondroitin Sulfate 400mg",brandPrice:325,genericPrice:185},\n  {brand:"Methylsulfonylmethane 1000",generic:"MSM 1000mg",brandPrice:385,genericPrice:225},\n  {brand:"Collagen Peptides",generic:"Collagen Type II 40mg",brandPrice:485,genericPrice:285},\n  {brand:"Hyaluronic Acid 100",generic:"Hyaluronic Acid 100mg",brandPrice:625,genericPrice:425},\n  {brand:"Testosterone Gel",generic:"Testosterone 1%",brandPrice:1850,genericPrice:1450},\n  {brand:"Estradiol Patch",generic:"Estradiol 0.05mg",brandPrice:825,genericPrice:625},\n  {brand:"Conjugated Estrogens 0.625",generic:"Conjugated Estrogens 0.625mg",brandPrice:285,genericPrice:165},\n  {brand:"Tibolone 2.5",generic:"Tibolone 2.5mg",brandPrice:425,genericPrice:245},\n  {brand:"Black Cohosh Extract",generic:"Black Cohosh 40mg",brandPrice:385,genericPrice:225},\n  {brand:"Saw Palmetto Extract",generic:"Saw Palmetto 320mg",brandPrice:485,genericPrice:285},\n  {brand:"Cranberry Extract",generic:"Cranberry 500mg",brandPrice:285,genericPrice:165},\n  {brand:"D-Mannose 500",generic:"D-Mannose 500mg",brandPrice:625,genericPrice:425},\n  {brand:"Potassium Citrate 1080",generic:"Potassium Citrate 1080mg",brandPrice:145,genericPrice:75},\n  {brand:"Tamsulosin + Dutasteride",generic:"Tamsulosin 0.4mg + Dutasteride 0.5mg",brandPrice:285,genericPrice:165},\n  {brand:"Solifenacin 5",generic:"Solifenacin 5mg",brandPrice:325,genericPrice:185},\n  {brand:"Tolterodine 2",generic:"Tolterodine 2mg",brandPrice:285,genericPrice:165},\n  {brand:"Oxybutynin 5",generic:"Oxybutynin 5mg",brandPrice:85,genericPrice:45},\n  {brand:"Mirabegron 25",generic:"Mirabegron 25mg",brandPrice:625,genericPrice:425},\n  {brand:"Desmopressin 0.1",generic:"Desmopressin 0.1mg",brandPrice:485,genericPrice:285},\n  {brand:"Cabergoline 0.5",generic:"Cabergoline 0.5mg",brandPrice:385,genericPrice:225},\n  {brand:"Bromocriptine 2.5",generic:"Bromocriptine 2.5mg",brandPrice:145,genericPrice:75},\n  {brand:"Carbimazole 5",generic:"Carbimazole 5mg",brandPrice:42,genericPrice:22},\n  {brand:"Propylthiouracil 50",generic:"Propylthiouracil 50mg",brandPrice:28,genericPrice:12},\n  {brand:"Methimazole 5",generic:"Methimazole 5mg",brandPrice:55,genericPrice:28},\n  {brand:"Octreotide Injection",generic:"Octreotide 100mcg",brandPrice:2850,genericPrice:2200},\n  {brand:"Somatropin Injection",generic:"Somatropin 4 IU",brandPrice:3850,genericPrice:3200},\n  {brand:"Glargine + Lixisenatide",generic:"Insulin Glargine 100 IU + Lixisenatide 33mcg",brandPrice:3850,genericPrice:3200},\n  {brand:"Insulin + Metformin Combo",generic:"Insulin Glargine 100 IU (separate) + Metformin 500mg",brandPrice:1900,genericPrice:1450},\n  {brand:"Linagliptin 5",generic:"Linagliptin 5mg",brandPrice:285,genericPrice:165},\n  {brand:"Alogliptin 25",generic:"Alogliptin 25mg",brandPrice:325,genericPrice:185},\n  {brand:"Rosiglitazone 4",generic:"Rosiglitazone 4mg",brandPrice:145,genericPrice:75},\n  {brand:"Nateglinide + Metformin",generic:"Nateglinide 60mg + Metformin 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Vildagliptin + Metformin",generic:"Vildagliptin 50mg + Metformin 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Sitagliptin + Metformin",generic:"Sitagliptin 50mg + Metformin 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Dapagliflozin + Metformin",generic:"Dapagliflozin 10mg + Metformin 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Empagliflozin + Metformin",generic:"Empagliflozin 10mg + Metformin 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Amlodipine + Atorvastatin",generic:"Amlodipine 5mg + Atorvastatin 10mg",brandPrice:185,genericPrice:95},\n  {brand:"Amlodipine + Telmisartan",generic:"Amlodipine 5mg + Telmisartan 40mg",brandPrice:165,genericPrice:88},\n  {brand:"Losartan + Hydrochlorothiazide",generic:"Losartan 50mg + Hydrochlorothiazide 12.5mg",brandPrice:125,genericPrice:68},\n  {brand:"Telmisartan + Hydrochlorothiazide",generic:"Telmisartan 40mg + Hydrochlorothiazide 12.5mg",brandPrice:145,genericPrice:75},\n  {brand:"Enalapril + Hydrochlorothiazide",generic:"Enalapril 5mg + Hydrochlorothiazide 12.5mg",brandPrice:85,genericPrice:45},\n  {brand:"Ramipril + Hydrochlorothiazide",generic:"Ramipril 5mg + Hydrochlorothiazide 12.5mg",brandPrice:125,genericPrice:68},\n  {brand:"Perindopril + Amlodipine",generic:"Perindopril 5mg + Amlodipine 5mg",brandPrice:225,genericPrice:125},\n  {brand:"Valsartan + Amlodipine",generic:"Valsartan 80mg + Amlodipine 5mg",brandPrice:285,genericPrice:165},\n  {brand:"Olmesartan + Amlodipine",generic:"Olmesartan 20mg + Amlodipine 5mg",brandPrice:325,genericPrice:185},\n  {brand:"Bisoprolol + Hydrochlorothiazide",generic:"Bisoprolol 5mg + Hydrochlorothiazide 6.25mg",brandPrice:145,genericPrice:75},\n  {brand:"Atenolol + Chlorthalidone",generic:"Atenolol 50mg + Chlorthalidone 12.5mg",brandPrice:42,genericPrice:22},\n  {brand:"Aspirin + Clopidogrel",generic:"Aspirin 75mg + Clopidogrel 75mg",brandPrice:285,genericPrice:165},\n  {brand:"Aspirin + Atorvastatin",generic:"Aspirin 75mg + Atorvastatin 10mg",brandPrice:145,genericPrice:75},\n  {brand:"Rosuvastatin + Ezetimibe",generic:"Rosuvastatin 10mg + Ezetimibe 10mg",brandPrice:425,genericPrice:245},\n  {brand:"Atorvastatin + Ezetimibe",generic:"Atorvastatin 10mg + Ezetimibe 10mg",brandPrice:385,genericPrice:225},\n  {brand:"Sacubitril + Valsartan",generic:"Sacubitril 49mg + Valsartan 51mg",brandPrice:1850,genericPrice:1450},\n  {brand:"Tramadol + Paracetamol",generic:"Tramadol 37.5mg + Paracetamol 325mg",brandPrice:85,genericPrice:45},\n  {brand:"Paracetamol + Caffeine",generic:"Paracetamol 500mg + Caffeine 65mg",brandPrice:28,genericPrice:12},\n  {brand:"Diclofenac + Paracetamol",generic:"Diclofenac 50mg + Paracetamol 325mg",brandPrice:42,genericPrice:22},\n  {brand:"Aceclofenac + Paracetamol + Serratiopeptidase",generic:"Aceclofenac 100mg + Paracetamol 325mg + Serratiopeptidase 15mg",brandPrice:68,genericPrice:35},\n  {brand:"Diclofenac + Serratiopeptidase",generic:"Diclofenac 50mg + Serratiopeptidase 10mg",brandPrice:45,genericPrice:22},\n  {brand:"Paracetamol + Chlorpheniramine + Phenylephrine",generic:"Paracetamol 325mg + Chlorpheniramine 2mg + Phenylephrine 5mg",brandPrice:28,genericPrice:12},\n  {brand:"Dextromethorphan + Phenylephrine + Chlorpheniramine",generic:"Dextromethorphan 10mg + Phenylephrine 5mg + Chlorpheniramine 2mg",brandPrice:42,genericPrice:22},\n  {brand:"Ambroxol + Guaifenesin + Terbutaline",generic:"Ambroxol 15mg + Guaifenesin 50mg + Terbutaline 1.25mg",brandPrice:55,genericPrice:28},\n  {brand:"Levocetirizine + Montelukast",generic:"Levocetirizine 5mg + Montelukast 10mg",brandPrice:125,genericPrice:68},\n  {brand:"Fexofenadine + Montelukast",generic:"Fexofenadine 120mg + Montelukast 10mg",brandPrice:285,genericPrice:165},\n  {brand:"Cetirizine + Ambroxol",generic:"Cetirizine 5mg + Ambroxol 60mg",brandPrice:42,genericPrice:22},\n  {brand:"Vitamin B1 + B6 + B12",generic:"Thiamine 100mg + Pyridoxine 100mg + Methylcobalamin 1500mcg",brandPrice:85,genericPrice:45},\n  {brand:"Calcium + Vitamin D3 + Magnesium",generic:"Calcium 500mg + Vitamin D3 250 IU + Magnesium 50mg",brandPrice:145,genericPrice:75},\n  {brand:"Iron + Folic Acid + Vitamin B12",generic:"Ferrous Sulfate 150mg + Folic Acid 1.5mg + Vitamin B12 15mcg",brandPrice:28,genericPrice:12},\n  {brand:"Glucosamine + Chondroitin + MSM",generic:"Glucosamine 500mg + Chondroitin 400mg + MSM 250mg",brandPrice:485,genericPrice:285},\n  {brand:"Collagen + Vitamin C + Hyaluronic Acid",generic:"Collagen 40mg + Vitamin C 50mg + Hyaluronic Acid 30mg",brandPrice:625,genericPrice:425},\n  {brand:"Omega-3 + Coenzyme Q10",generic:"Omega-3 1000mg + Coenzyme Q10 100mg",brandPrice:485,genericPrice:285},\n  {brand:"Multivitamin + Minerals + Antioxidants",generic:"Comprehensive formula",brandPrice:225,genericPrice:125},\n  {brand:"Lycopene + Multivitamin + Multimineral",generic:"Lycopene 10mg + Multivitamin + Multimineral",brandPrice:285,genericPrice:165},\n  {brand:"Green Tea Extract + Garcinia Cambogia",generic:"Green Tea 250mg + Garcinia Cambogia 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Ashwagandha Extract 300",generic:"Ashwagandha 300mg",brandPrice:285,genericPrice:165},\n  {brand:"Curcumin 500",generic:"Curcumin 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Ginkgo Biloba 120",generic:"Ginkgo Biloba 120mg",brandPrice:285,genericPrice:165},\n  {brand:"Ginseng Extract 200",generic:"Panax Ginseng 200mg",brandPrice:425,genericPrice:245},\n  {brand:"Tribulus Terrestris 500",generic:"Tribulus Terrestris 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Fenugreek Extract 500",generic:"Fenugreek 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Garlic Extract 500",generic:"Garlic 500mg",brandPrice:185,genericPrice:95},\n  {brand:"Spirulina 500",generic:"Spirulina 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Chlorella 500",generic:"Chlorella 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Whey Protein Powder",generic:"Whey Protein 30g per serving",brandPrice:1850,genericPrice:1450},\n  {brand:"Creatine Monohydrate 3g",generic:"Creatine 3g",brandPrice:625,genericPrice:425},\n  {brand:"BCAA 5g",generic:"Branched Chain Amino Acids 5g",brandPrice:825,genericPrice:625},\n  {brand:"L-Carnitine 500",generic:"L-Carnitine 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Alpha Lipoic Acid 300",generic:"Alpha Lipoic Acid 300mg",brandPrice:385,genericPrice:225},\n  {brand:"Biotin 10000mcg",generic:"Biotin 10mg",brandPrice:285,genericPrice:165},\n  {brand:"Silica 50",generic:"Silicon Dioxide 50mg",brandPrice:225,genericPrice:125},\n  {brand:"Collagen Peptides Powder",generic:"Collagen 10g per serving",brandPrice:1450,genericPrice:1150},\n  {brand:"Glutamine 5g",generic:"L-Glutamine 5g",brandPrice:625,genericPrice:425},\n  {brand:"Probiotics 10 Billion CFU",generic:"Lactobacillus + Bifidobacterium 10B CFU",brandPrice:485,genericPrice:285},\n  {brand:"Prebiotics Inulin 5g",generic:"Inulin 5g",brandPrice:325,genericPrice:185},\n  {brand:"Fiber Supplement 5g",generic:"Psyllium Husk 5g",brandPrice:225,genericPrice:125},\n  {brand:"Apple Cider Vinegar 500",generic:"Apple Cider Vinegar 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Berberine 500",generic:"Berberine 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Cinnamon Extract 500",generic:"Cinnamon 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Bitter Melon Extract 500",generic:"Bitter Melon 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Gymnema Sylvestre 400",generic:"Gymnema Sylvestre 400mg",brandPrice:325,genericPrice:185},\n  {brand:"Milk Thistle 500",generic:"Silymarin 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Dandelion Root 500",generic:"Dandelion 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Turmeric + Black Pepper",generic:"Curcumin 500mg + Piperine 5mg",brandPrice:425,genericPrice:245},\n  {brand:"Resveratrol 200",generic:"Resveratrol 200mg",brandPrice:625,genericPrice:425},\n  {brand:"Quercetin 500",generic:"Quercetin 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Echinacea 400",generic:"Echinacea 400mg",brandPrice:225,genericPrice:125},\n  {brand:"Elderberry Extract 500",generic:"Elderberry 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Vitamin D3 + K2",generic:"Cholecalciferol 1000 IU + Menaquinone 100mcg",brandPrice:385,genericPrice:225},\n  {brand:"Magnesium Glycinate 400",generic:"Magnesium 400mg",brandPrice:325,genericPrice:185},\n  {brand:"Zinc Picolinate 50",generic:"Zinc 50mg",brandPrice:185,genericPrice:95},\n  {brand:"Selenium 200mcg",generic:"Selenium 200mcg",brandPrice:225,genericPrice:125},\n  {brand:"Iodine 150mcg",generic:"Potassium Iodide 150mcg",brandPrice:145,genericPrice:75},\n  {brand:"Chromium Picolinate 200mcg",generic:"Chromium 200mcg",brandPrice:225,genericPrice:125},\n  {brand:"Vanadium 10mg",generic:"Vanadyl Sulfate 10mg",brandPrice:285,genericPrice:165},\n  {brand:"Molybdenum 150mcg",generic:"Molybdenum 150mcg",brandPrice:185,genericPrice:95},\n  {brand:"Manganese 5mg",generic:"Manganese 5mg",brandPrice:145,genericPrice:75},\n  {brand:"Copper 2mg",generic:"Copper 2mg",brandPrice:165,genericPrice:88},\n  {brand:"Boron 3mg",generic:"Boron 3mg",brandPrice:185,genericPrice:95},\n  {brand:"Inositol 500",generic:"Inositol 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Choline 250",generic:"Choline Bitartrate 250mg",brandPrice:225,genericPrice:125},\n  {brand:"L-Theanine 200",generic:"L-Theanine 200mg",brandPrice:385,genericPrice:225},\n  {brand:"5-HTP 100",generic:"5-Hydroxytryptophan 100mg",brandPrice:425,genericPrice:245},\n  {brand:"SAMe 400",generic:"S-Adenosyl Methionine 400mg",brandPrice:825,genericPrice:625},\n  {brand:"St. John's Wort 300",generic:"Hypericum Extract 300mg",brandPrice:285,genericPrice:165},\n  {brand:"Valerian Root 500",generic:"Valerian 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Passionflower Extract 250",generic:"Passionflower 250mg",brandPrice:285,genericPrice:165},\n  {brand:"Lemon Balm Extract 500",generic:"Lemon Balm 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Rhodiola Rosea 500",generic:"Rhodiola 500mg",brandPrice:425,genericPrice:245},\n  {brand:"Bacopa Monnieri 300",generic:"Bacopa 300mg",brandPrice:325,genericPrice:185},\n  {brand:"Lion's Mane 500",generic:"Lion's Mane Mushroom 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Cordyceps 500",generic:"Cordyceps Mushroom 500mg",brandPrice:625,genericPrice:425},\n  {brand:"Reishi 500",generic:"Reishi Mushroom 500mg",brandPrice:425,genericPrice:245},\n  {brand:"Chaga 500",generic:"Chaga Mushroom 500mg",brandPrice:485,genericPrice:285},\n  {brand:"Maca Root 500",generic:"Maca 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Horny Goat Weed 500",generic:"Epimedium 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Mucuna Pruriens 500",generic:"Mucuna 500mg",brandPrice:425,genericPrice:245},\n  {brand:"Phosphatidylserine 100",generic:"Phosphatidylserine 100mg",brandPrice:625,genericPrice:425},\n  {brand:"Acetyl L-Carnitine 500",generic:"Acetyl L-Carnitine 500mg",brandPrice:485,genericPrice:285},\n  {brand:"N-Acetyl Cysteine 600",generic:"NAC 600mg",brandPrice:385,genericPrice:225},\n  {brand:"Taurine 500",generic:"Taurine 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Glycine 1000",generic:"Glycine 1g",brandPrice:325,genericPrice:185},\n  {brand:"L-Arginine 1000",generic:"L-Arginine 1g",brandPrice:425,genericPrice:245},\n  {brand:"L-Citrulline 1000",generic:"L-Citrulline 1g",brandPrice:485,genericPrice:285},\n  {brand:"Beta-Alanine 1500",generic:"Beta-Alanine 1.5g",brandPrice:525,genericPrice:325},\n  {brand:"HMB 1000",generic:"Beta-Hydroxy Beta-Methylbutyrate 1g",brandPrice:825,genericPrice:625},\n  {brand:"D-Aspartic Acid 1000",generic:"D-Aspartic Acid 1g",brandPrice:625,genericPrice:425},\n  {brand:"Tribestan 250",generic:"Tribulus Extract 250mg",brandPrice:425,genericPrice:245},\n  {brand:"Tongkat Ali 200",generic:"Eurycoma Longifolia 200mg",brandPrice:625,genericPrice:425},\n  {brand:"Pine Bark Extract 100",generic:"Pycnogenol 100mg",brandPrice:825,genericPrice:625},\n  {brand:"Grape Seed Extract 200",generic:"Grape Seed 200mg",brandPrice:385,genericPrice:225},\n  {brand:"Lutein 20",generic:"Lutein 20mg",brandPrice:485,genericPrice:285},\n  {brand:"Zeaxanthin 4",generic:"Zeaxanthin 4mg",brandPrice:425,genericPrice:245},\n  {brand:"Bilberry Extract 160",generic:"Bilberry 160mg",brandPrice:385,genericPrice:225},\n  {brand:"Eyebright Extract 400",generic:"Euphrasia 400mg",brandPrice:285,genericPrice:165},\n  {brand:"Betaine HCl 650",generic:"Betaine Hydrochloride 650mg",brandPrice:325,genericPrice:185},\n  {brand:"Digestive Enzymes",generic:"Amylase + Protease + Lipase",brandPrice:425,genericPrice:245},\n  {brand:"Papaya Enzyme 500",generic:"Papain 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Bromelain 500",generic:"Bromelain 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Aloe Vera Extract 200",generic:"Aloe Vera 200mg",brandPrice:285,genericPrice:165},\n  {brand:"Slippery Elm 400",generic:"Slippery Elm 400mg",brandPrice:325,genericPrice:185},\n  {brand:"Marshmallow Root 500",generic:"Marshmallow 500mg",brandPrice:285,genericPrice:165},\n  {brand:"DGL Licorice 400",generic:"Deglycyrrhizinated Licorice 400mg",brandPrice:325,genericPrice:185},\n  {brand:"Mastic Gum 500",generic:"Mastic Gum 500mg",brandPrice:625,genericPrice:425},\n  {brand:"Artichoke Extract 500",generic:"Artichoke 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Beet Root Extract 500",generic:"Beet Root 500mg",brandPrice:325,genericPrice:185},\n  {brand:"Hawthorn Berry 500",generic:"Hawthorn 500mg",brandPrice:385,genericPrice:225},\n  {brand:"Cayenne Pepper 500",generic:"Capsaicin 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Ginger Extract 500",generic:"Ginger 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Peppermint Oil 50",generic:"Peppermint Oil 50mg",brandPrice:325,genericPrice:185},\n  {brand:"Fennel Seed Extract 500",generic:"Fennel 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Caraway Seed Extract 500",generic:"Caraway 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Black Seed Oil 500",generic:"Nigella Sativa 500mg",brandPrice:425,genericPrice:245},\n  {brand:"Evening Primrose Oil 1000",generic:"GLA 1000mg",brandPrice:485,genericPrice:285},\n  {brand:"Borage Oil 1000",generic:"GLA 1000mg",brandPrice:525,genericPrice:325},\n  {brand:"Flaxseed Oil 1000",generic:"ALA 1000mg",brandPrice:325,genericPrice:185},\n  {brand:"Krill Oil 500",generic:"Omega-3 + Astaxanthin 500mg",brandPrice:825,genericPrice:625},\n  {brand:"Astaxanthin 12",generic:"Astaxanthin 12mg",brandPrice:625,genericPrice:425},\n  {brand:"Beta-Carotene 25000 IU",generic:"Beta-Carotene 25000 IU",brandPrice:285,genericPrice:165},\n  {brand:"Vitamin A 10000 IU",generic:"Retinol 10000 IU",brandPrice:225,genericPrice:125},\n  {brand:"Vitamin E 400 IU",generic:"Tocopherol 400 IU",brandPrice:325,genericPrice:185},\n  {brand:"Vitamin K2 MK-7 100mcg",generic:"Menaquinone 100mcg",brandPrice:425,genericPrice:245},\n  {brand:"Folate 1000mcg",generic:"5-MTHF 1mg",brandPrice:385,genericPrice:225},\n  {brand:"Vitamin B6 100",generic:"Pyridoxine 100mg",brandPrice:185,genericPrice:95},\n  {brand:"Vitamin B12 5000mcg",generic:"Methylcobalamin 5mg",brandPrice:325,genericPrice:185},\n  {brand:"Niacin 500",generic:"Niacin 500mg",brandPrice:225,genericPrice:125},\n  {brand:"Pantothenic Acid 500",generic:"Vitamin B5 500mg",brandPrice:285,genericPrice:165},\n  {brand:"Riboflavin 100",generic:"Vitamin B2 100mg",brandPrice:185,genericPrice:95},\n  {brand:"Thiamine 100",generic:"Vitamin B1 100mg",brandPrice:145,genericPrice:75},\n  {brand:"Biotin 5000mcg",generic:"Biotin 5mg",brandPrice:225,genericPrice:125}\n];
+const medicineDatabase = [
+  {
+    "id": 1,
+    "brand": "Crocin 650",
+    "generic": "Paracetamol 650mg",
+    "brandPrice": 35,
+    "genericPrice": 15,
+    "manufacturer": "GSK",
+    "storageAdvice": "Store below 30C in a cool, dry place",
+    "uses": "Used to relieve mild to moderate pain and fever such as headaches, muscle ache, toothache, and fever due to cold or flu.",
+    "sideEffects": [
+      "Nausea",
+      "Dizziness",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/10c85f7a2dc9bb322e894684e3ee2caeb75a8fd0.jpg"
+  },
+  {
+    "id": 2,
+    "brand": "Augmentin 625",
+    "generic": "Amoxicillin 500mg + Clavulanic Acid 125mg",
+    "brandPrice": 190,
+    "genericPrice": 90,
+    "manufacturer": "GSK",
+    "storageAdvice": "Store below 25C and protect from moisture",
+    "uses": "Used for treating bacterial infections such as sinusitis, bronchitis, pneumonia, urinary tract infections, and skin infections.",
+    "sideEffects": [
+      "Nausea",
+      "Vomiting",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/0bbcab206cee48648c9ab1609e4fbe1c56b3da2d.jpg"
+  },
+  {
+    "id": 3,
+    "brand": "Glycomet 500",
+    "generic": "Metformin 500mg",
+    "brandPrice": 28,
+    "genericPrice": 12,
+    "manufacturer": "USV Ltd",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used in the treatment of type 2 diabetes to help lower blood sugar by reducing glucose production in the liver and improving insulin sensitivity.",
+    "sideEffects": [
+      "Nausea",
+      "Diarrhoea",
+      "Abdominal discomfort"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/16291d72eaa23c022b1792aee7f0dc1040169e82.jpg"
+  },
+  {
+    "id": 4,
+    "brand": "Lantus Solostar",
+    "generic": "Insulin Glargine 100 IU/ml",
+    "brandPrice": 1850,
+    "genericPrice": 1400,
+    "manufacturer": "Sanofi",
+    "storageAdvice": "Refrigerate but do not freeze; once opened, store at room temperature for up to 28 days",
+    "uses": "Used as a long-acting insulin for the management of type 1 and type 2 diabetes mellitus to control blood glucose levels.",
+    "sideEffects": [
+      "Injection site reaction",
+      "Hypoglycemia",
+      "Weight gain"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/36ed15f2ed50267bc5a929d2a9ac3e9b5e38b2dc.jpg"
+  },
+  {
+    "id": 5,
+    "brand": "Human Mixtard 70/30",
+    "generic": "Insulin Isophane 70% + Human Insulin 30%",
+    "brandPrice": 650,
+    "genericPrice": 480,
+    "manufacturer": "Novo Nordisk",
+    "storageAdvice": "Refrigerate but do not freeze; once opened, store at room temperature for up to 28 days",
+    "uses": "Used as a biphasic insulin for diabetes to provide both short-acting and long-acting insulin effects in a single injection.",
+    "sideEffects": [
+      "Hypoglycemia",
+      "Injection site reaction",
+      "Weight gain"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5d5e57ef4df3c365d2ebb25b8e6c15b989f4cc5f.jpg"
+  },
+  {
+    "id": 6,
+    "brand": "Glycomet-GP 1",
+    "generic": "Metformin 500mg + Glimepiride 1mg",
+    "brandPrice": 72,
+    "genericPrice": 35,
+    "manufacturer": "USV Ltd",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat type 2 diabetes by lowering blood glucose levels through reduced glucose production and improved insulin secretion.",
+    "sideEffects": [
+      "Hypoglycemia",
+      "Nausea",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 7,
+    "brand": "Telma 40",
+    "generic": "Telmisartan 40mg",
+    "brandPrice": 85,
+    "genericPrice": 38,
+    "manufacturer": "Glenmark Pharmaceuticals Ltd",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat high blood pressure and reduce the risk of heart attack and stroke by blocking angiotensin II-induced vasoconstriction.",
+    "sideEffects": [
+      "Dizziness",
+      "Back pain",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5c263ba88ec15dd475503dcde4e0fece6efc7928.jpg"
+  },
+  {
+    "id": 8,
+    "brand": "Amlopres 5",
+    "generic": "Amlodipine 5mg",
+    "brandPrice": 45,
+    "genericPrice": 18,
+    "manufacturer": "Cipla Ltd",
+    "storageAdvice": "Store below 30C and keep in a dry place",
+    "uses": "Used to treat high blood pressure and angina by relaxing blood vessels and reducing the workload on the heart.",
+    "sideEffects": [
+      "Swelling feet/ankles",
+      "Headache",
+      "Dizziness"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/133f7d045b4466ca6914fd7c57abb3c22d1bd9eb.jpg"
+  },
+  {
+    "id": 9,
+    "brand": "Storvas 10",
+    "generic": "Atorvastatin 10mg",
+    "brandPrice": 95,
+    "genericPrice": 42,
+    "manufacturer": "Sun Pharmaceutical Industries Ltd",
+    "storageAdvice": "Store below 25C and protect from moisture",
+    "uses": "Used to lower cholesterol and triglyceride levels to reduce the risk of heart disease and stroke.",
+    "sideEffects": [
+      "Muscle pain",
+      "Diarrhoea",
+      "Headache"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/389c003b74c57e388946f57cc85cad47b17698a8.jpg"
+  },
+  {
+    "id": 10,
+    "brand": "Thyronorm 50",
+    "generic": "Levothyroxine Sodium 50mcg",
+    "brandPrice": 75,
+    "genericPrice": 32,
+    "manufacturer": "Abbott",
+    "storageAdvice": "Store below 25C and keep away from light and moisture",
+    "uses": "Used to treat hypothyroidism by replacing or supplementing the naturally occurring thyroid hormone.",
+    "sideEffects": [
+      "Headache",
+      "Weight loss",
+      "Increased sweating"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/9779a34c1c592e4787a0e474ebe6d74b79b60f7f.jpg"
+  },
+  {
+    "id": 11,
+    "brand": "Pantocid 40",
+    "generic": "Pantoprazole 40mg",
+    "brandPrice": 110,
+    "genericPrice": 48,
+    "manufacturer": "Zydus Cadila",
+    "storageAdvice": "Store below 25C and protect from moisture",
+    "uses": "Used to treat gastroesophageal reflux disease, peptic ulcers, and conditions with excess stomach acid by reducing gastric acid secretion.",
+    "sideEffects": [
+      "Headache",
+      "Diarrhoea",
+      "Nausea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/3104abd6dea33d14b960a21ea477e70dd8667658.jpg"
+  },
+  {
+    "id": 12,
+    "brand": "Azithral 500",
+    "generic": "Azithromycin 500mg",
+    "brandPrice": 126,
+    "genericPrice": 85,
+    "manufacturer": "Zydus Cadila",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat bacterial infections such as respiratory tract infections, skin infections, and some sexually transmitted infections.",
+    "sideEffects": [
+      "Nausea",
+      "Diarrhoea",
+      "Abdominal pain"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/de3aa878b965b08a14c69b3a446c7e02c783c89c.jpg"
+  },
+  {
+    "id": 13,
+    "brand": "Dolo 650",
+    "generic": "Paracetamol 650mg",
+    "brandPrice": 30,
+    "genericPrice": 12,
+    "manufacturer": "Mankind Pharma",
+    "storageAdvice": "Store below 30C in a cool, dry place",
+    "uses": "Used to relieve pain and reduce fever associated with headaches, muscle ache, fever, and cold or flu.",
+    "sideEffects": [
+      "Nausea",
+      "Dizziness",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/899757cc67df43b2f30deec7ed1ae4fa1f4108d5.jpg"
+  },
+  {
+    "id": 14,
+    "brand": "Allegra 120",
+    "generic": "Fexofenadine 120mg",
+    "brandPrice": 273,
+    "genericPrice": 145,
+    "manufacturer": "Sanofi",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat allergic rhinitis and chronic urticaria by blocking histamine-mediated allergy symptoms.",
+    "sideEffects": [
+      "Headache",
+      "Dizziness",
+      "Nausea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/4ddff6f4fa3e8dbe4b95f085f98134321e70f695.jpg"
+  },
+  {
+    "id": 15,
+    "brand": "Lasix 40",
+    "generic": "Furosemide 40mg",
+    "brandPrice": 18,
+    "genericPrice": 8,
+    "manufacturer": "Sun Pharmaceutical Industries Ltd",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat fluid buildup (edema) due to heart failure, liver disease, or kidney disease by increasing urine output.",
+    "sideEffects": [
+      "Electrolyte imbalance",
+      "Dizziness",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/5652e726bf1a150d84535573fb11997c9bde2185.jpg"
+  },
+  {
+    "id": 16,
+    "brand": "Lopressor 50",
+    "generic": "Metoprolol 50mg",
+    "brandPrice": 65,
+    "genericPrice": 28,
+    "manufacturer": "Novartis",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat high blood pressure, angina, and to prevent heart attack by reducing heart rate and blood pressure.",
+    "sideEffects": [
+      "Dizziness",
+      "Fatigue",
+      "Bradycardia"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/a3a298859d5b3b239f150108dc38025263d55b1c.jpg"
+  },
+  {
+    "id": 17,
+    "brand": "Cozaar 50",
+    "generic": "Losartan 50mg",
+    "brandPrice": 145,
+    "genericPrice": 68,
+    "manufacturer": "Merck & Co.",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat high blood pressure and protect kidney in diabetic patients by blocking angiotensin II receptors.",
+    "sideEffects": [
+      "Dizziness",
+      "Back pain",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/9eda8cae03b08ef22fb2b7ceee87ef7bec6e30b1.jpg"
+  },
+  {
+    "id": 18,
+    "brand": "Glucotrol 5",
+    "generic": "Glipizide 5mg",
+    "brandPrice": 42,
+    "genericPrice": 18,
+    "manufacturer": "Pfizer",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat type 2 diabetes by stimulating insulin release from the pancreas to lower blood glucose.",
+    "sideEffects": [
+      "Hypoglycemia",
+      "Dizziness",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/829289b85e502b8d79dfc1e434d960ace125a88f.jpg"
+  },
+  {
+    "id": 19,
+    "brand": "Zestril 5",
+    "generic": "Lisinopril 5mg",
+    "brandPrice": 78,
+    "genericPrice": 35,
+    "manufacturer": "AstraZeneca",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat high blood pressure and heart failure by inhibiting angiotensin-converting enzyme and relaxing blood vessels.",
+    "sideEffects": [
+      "Dizziness",
+      "Cough",
+      "Headache"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/47dc468d4b562abec89071222acbe92f87a960ce.jpg"
+  },
+  {
+    "id": 20,
+    "brand": "Cardace 2.5",
+    "generic": "Ramipril 2.5mg",
+    "brandPrice": 88,
+    "genericPrice": 42,
+    "manufacturer": "Sanofi",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat high blood pressure and reduce the risk of heart attack and stroke by blocking angiotensin-converting enzyme.",
+    "sideEffects": [
+      "Dizziness",
+      "Cough",
+      "Headache"
+    ],
+    "imageUrl": "https://pplx-res.cloudinary.com/image/upload/pplx_search_images/bc168eaa3a6936c0ec2e3e40b0896389463313bd.jpg"
+  },
+  {
+    "id": 21,
+    "brand": "Cipcal 500",
+    "generic": "Calcium Carbonate 500mg",
+    "brandPrice": 65,
+    "genericPrice": 28,
+    "manufacturer": "Intas Pharmaceuticals",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat calcium deficiency and to prevent osteoporosis by providing supplemental calcium.",
+    "sideEffects": [
+      "Constipation",
+      "Flatulence",
+      "Stomach upset"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 22,
+    "brand": "Shelcal 500",
+    "generic": "Calcium Carbonate 500mg + Vitamin D3 250 IU",
+    "brandPrice": 115,
+    "genericPrice": 58,
+    "manufacturer": "Intas Pharmaceuticals",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to prevent or treat calcium and vitamin D deficiency, especially in osteoporosis and during pregnancy.",
+    "sideEffects": [
+      "Constipation",
+      "Flatulence",
+      "Stomach upset"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 23,
+    "brand": "Becosules",
+    "generic": "Vitamin B Complex + Vitamin C",
+    "brandPrice": 38,
+    "genericPrice": 18,
+    "manufacturer": "Merck & Co.",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used as a supplement for vitamin B and vitamin C deficiencies to support skin, nerve, and overall metabolic health.",
+    "sideEffects": [
+      "Nausea",
+      "Headache",
+      "Urine discoloration"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 24,
+    "brand": "Neurobion Forte",
+    "generic": "Vitamin B1 + B6 + B12",
+    "brandPrice": 42,
+    "genericPrice": 22,
+    "manufacturer": "Merck & Co.",
+    "storageAdvice": "Store below 25C and keep away from light",
+    "uses": "Used to treat vitamin B1, B6, and B12 deficiency-related neuropathy, fatigue, and numbness/tingling in limbs.",
+    "sideEffects": [
+      "Nausea",
+      "Headache",
+      "Rash"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 25,
+    "brand": "Omez 20",
+    "generic": "Omeprazole 20mg",
+    "brandPrice": 95,
+    "genericPrice": 42,
+    "manufacturer": "Sun Pharmaceutical Industries Ltd",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat gastroesophageal reflux disease, peptic ulcers, and excess stomach acid by reducing acid production.",
+    "sideEffects": [
+      "Headache",
+      "Diarrhoea",
+      "Abdominal pain"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 26,
+    "brand": "Ranitidine 150",
+    "generic": "Ranitidine 150mg",
+    "brandPrice": 18,
+    "genericPrice": 8,
+    "manufacturer": "GlaxoSmithKline",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat heartburn, peptic ulcers, and gastroesophageal reflux by reducing stomach acid secretion.",
+    "sideEffects": [
+      "Nausea",
+      "Dizziness",
+      "Constipation"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 27,
+    "brand": "Domperidone 10",
+    "generic": "Domperidone 10mg",
+    "brandPrice": 22,
+    "genericPrice": 10,
+    "manufacturer": "Johnson & Johnson",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to treat nausea, vomiting, and feeling of fullness after meals by increasing gastric motility.",
+    "sideEffects": [
+      "Dry mouth",
+      "Restlessness",
+      "Diarrhoea"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 28,
+    "brand": "Ondem 4",
+    "generic": "Ondansetron 4mg",
+    "brandPrice": 45,
+    "genericPrice": 22,
+    "manufacturer": "Emcure Pharmaceuticals",
+    "storageAdvice": "Store below 25C and keep away from moisture",
+    "uses": "Used to prevent nausea and vomiting associated with chemotherapy, radiotherapy, and surgery.",
+    "sideEffects": [
+      "Headache",
+      "Dizziness",
+      "Constipation"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 29,
+    "brand": "Disprin",
+    "generic": "Aspirin 325mg",
+    "brandPrice": 12,
+    "genericPrice": 5,
+    "manufacturer": "Reckitt Benckiser",
+    "storageAdvice": "Store below 25C in a dry place and keep away from moisture",
+    "uses": "Used to relieve pain, reduce fever, and act as an anti-platelet agent to prevent heart attack and stroke.",
+    "sideEffects": [
+      "Stomach upset",
+      "Nausea",
+      "Ringing in ears"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  },
+  {
+    "id": 30,
+    "brand": "Ecosprin 75",
+    "generic": "Aspirin 75mg",
+    "brandPrice": 8,
+    "genericPrice": 3,
+    "manufacturer": "USV Ltd",
+    "storageAdvice": "Store below 25C in a dry place and keep away from moisture",
+    "uses": "Used as a low-dose anti-platelet agent to prevent heart attack, stroke, and blood clot formation in high-risk patients.",
+    "sideEffects": [
+      "Stomach upset",
+      "Nausea",
+      "Ringing in ears"
+    ],
+    "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"
+  }
+];
+
+if (typeof module !== 'undefined') {
+  module.exports = medicineDatabase;
+}
+
+if (typeof window !== 'undefined') {
+  window.medicineDatabase = medicineDatabase;
+}

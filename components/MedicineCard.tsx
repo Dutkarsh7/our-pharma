@@ -22,23 +22,28 @@ type MedicineCardProps = LegacyProps | CatalogProps;
 
 const fallbackImage = 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420"%3E%3Crect width="640" height="420" rx="32" fill="%23eff6ff"/%3E%3Cg fill="none" stroke="%230f766e" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M225 162c0-28 23-51 51-51h34c28 0 51 23 51 51v96c0 28-23 51-51 51h-34c-28 0-51-23-51-51z"/%3E%3Cpath d="M320 111v198"/%3E%3Cpath d="M245 210h150"/%3E%3C/g%3E%3C/svg%3E';
 
-const getUses = (value: string): string[] =>
-  value
+const getUses = (value?: string): string[] =>
+  (value ?? '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
 
-const getSideEffects = (value?: string): string[] =>
-  (value ?? 'Nausea, mild dizziness, stomach discomfort')
+const getSideEffects = (value?: string | string[]): string[] => {
+  if (Array.isArray(value)) {
+    return value.map((item) => item.trim()).filter(Boolean);
+  }
+
+  return (value ?? 'Nausea, mild dizziness, stomach discomfort')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
+};
 
 const CatalogMedicineCard: React.FC<CatalogProps> = ({ medicine, onAddCatalogToCart }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(medicine.imageUrl || fallbackImage);
-  const uses = useMemo(() => getUses(medicine.health_issues), [medicine.health_issues]);
-  const sideEffects = useMemo(() => getSideEffects(medicine.sideEffects), [medicine.sideEffects]);
+  const uses = useMemo(() => getUses(medicine.uses || medicine.health_issues), [medicine.uses, medicine.health_issues]);
+  const sideEffects = useMemo(() => getSideEffects(medicine.side_effects || medicine.sideEffects), [medicine.side_effects, medicine.sideEffects]);
   const savings = Math.max(0, medicine.brand_price - medicine.generic_price);
   const discount = medicine.brand_price > 0 ? Math.round((savings / medicine.brand_price) * 100) : 0;
   const manufacturer = medicine.manufacturer || 'Our Pharma Verified Partner';

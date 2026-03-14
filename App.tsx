@@ -376,6 +376,8 @@ const App: React.FC = () => {
     medicine: CatalogMedicine,
     selectedType: 'brand' | 'generic'
   ): PrescriptionMedicine => {
+    const drugClass = medicine.chronic_keywords || 'General care';
+    const uses = medicine.uses || medicine.health_issues || medicine.generic_name;
     const selectedPrice = selectedType === 'brand' ? medicine.brand_price : medicine.generic_price;
     const savingsAmount = Math.max(0, medicine.brand_price - medicine.generic_price);
     const savingsPercentage = medicine.brand_price > 0
@@ -386,7 +388,7 @@ const App: React.FC = () => {
       originalName: medicine.brand_name,
       activeSalt: medicine.generic_name,
       strength: medicine.generic_name,
-      manufacturer: 'OurPharma Partner',
+      manufacturer: medicine.manufacturer || 'OurPharma Partner',
       brandedPrice: medicine.brand_price,
       genericPrice: selectedPrice,
       genericBrandName: selectedType === 'brand' ? `${medicine.brand_name} (Brand)` : medicine.generic_name,
@@ -399,11 +401,11 @@ const App: React.FC = () => {
       benefits: ['Verified molecular match', 'Lower out-of-pocket cost', 'Fast local fulfillment'],
       rxRequired: true,
       isNarcotic: false,
-      drugClass: medicine.chronic_keywords,
-      uses: medicine.health_issues,
+      drugClass,
+      uses,
       sideEffects: 'Use only as advised by a qualified clinician.',
       dosage: 'Follow your doctor\'s prescription and label directions.',
-      category: medicine.chronic_keywords.toLowerCase().includes('chronic') ? 'Chronic Care' : 'General Care'
+      category: drugClass.toLowerCase().includes('chronic') ? 'Chronic Care' : 'General Care'
     };
   };
 

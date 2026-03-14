@@ -53,7 +53,10 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
     const normalizedQuery = query.trim().toLowerCase();
 
     return medicines.filter((medicine) => {
-      if (chronicOnly && !medicine.chronic_keywords.toLowerCase().includes('chronic')) {
+      const chronicSource = (medicine.chronic_keywords || medicine.uses || '').toLowerCase();
+      const usesSource = (medicine.uses || medicine.health_issues || '').toLowerCase();
+
+      if (chronicOnly && !chronicSource.includes('chronic')) {
         return false;
       }
 
@@ -64,7 +67,7 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
       return (
         medicine.brand_name.toLowerCase().includes(normalizedQuery) ||
         medicine.generic_name.toLowerCase().includes(normalizedQuery) ||
-        medicine.health_issues.toLowerCase().includes(normalizedQuery)
+        usesSource.includes(normalizedQuery)
       );
     });
   }, [query, chronicOnly]);

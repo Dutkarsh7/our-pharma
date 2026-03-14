@@ -125,7 +125,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const catalog = useMemo(
     () => medicines.map((medicine) => ({
       ...medicine,
-      searchText: normalize(`${medicine.brand_name} ${medicine.generic_name} ${medicine.health_issues}`),
+      searchText: normalize(`${medicine.brand_name} ${medicine.generic_name} ${medicine.uses || medicine.health_issues || ''}`),
     })),
     []
   );
@@ -196,14 +196,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     }
 
     if (useIntentPattern.test(question)) {
-      return `${medicine.brand_name} is commonly used for ${medicine.health_issues}. The active composition is ${medicine.generic_name}.`;
+      return `${medicine.brand_name} is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. The active composition is ${medicine.generic_name}.`;
     }
 
     if (priceIntentPattern.test(question)) {
       return `${medicine.brand_name}: brand ₹${medicine.brand_price}, generic ₹${medicine.generic_price}. Estimated savings are ₹${savings} which is about ${discount}% lower.`;
     }
 
-    return `${medicine.brand_name} contains ${medicine.generic_name}. It is commonly used for ${medicine.health_issues}. Generic option is ₹${medicine.generic_price}.`;
+    return `${medicine.brand_name} contains ${medicine.generic_name}. It is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. Generic option is ₹${medicine.generic_price}.`;
   };
 
   const generateReply = async (message: string): Promise<void> => {
