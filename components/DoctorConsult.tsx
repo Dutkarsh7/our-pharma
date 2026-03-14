@@ -2,6 +2,7 @@ import React from 'react';
 
 interface DoctorConsultProps {
   onUploadRx: () => void;
+  onBookConsultation: () => void;
 }
 
 const doctor = {
@@ -18,7 +19,7 @@ const doctor = {
   image: '/doctor.jpg'
 };
 
-const DoctorConsult: React.FC<DoctorConsultProps> = ({ onUploadRx }) => {
+const DoctorConsult: React.FC<DoctorConsultProps> = ({ onUploadRx, onBookConsultation }) => {
   return (
     <div className="rounded-2xl border border-green-800 bg-gray-900 p-6">
       <h2 className="mb-4 text-xl font-bold text-white">
@@ -86,7 +87,7 @@ const DoctorConsult: React.FC<DoctorConsultProps> = ({ onUploadRx }) => {
       </p>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-        <button className="flex-1 rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-500">
+        <button onClick={onBookConsultation} className="flex-1 rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-500">
           📅 Book Consultation — ₹99
         </button>
         <button

@@ -14,6 +14,7 @@ interface CheckoutProps {
   onRemove: (salt: string) => void;
   onClose: () => void;
   onClearCart: () => void;
+  onBookMedicalConsultation: (reason?: string) => void;
 }
 
 type Step = 'cart' | 'address' | 'payment';
@@ -47,7 +48,7 @@ const cardVariants = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, type: 'spring', stiffness: 280, damping: 22 } }),
 };
 
-const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRemove, onClose, onClearCart }) => {
+const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRemove, onClose, onClearCart, onBookMedicalConsultation }) => {
   const isDark = theme === 'dark';
   const [step, setStep] = useState<Step>('cart');
   const [paymentState, setPaymentState] = useState<PaymentState>('idle');
@@ -272,7 +273,10 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
 
           {!hasScheduleX && hasScheduleH && (
             <div className="space-y-4 rounded-2xl border border-green-900 bg-[#0f1714] p-4">
-              <DoctorConsult onUploadRx={() => setShowUpload(true)} />
+              <DoctorConsult
+                onUploadRx={() => setShowUpload(true)}
+                onBookConsultation={() => onBookMedicalConsultation(`Prescription consultation for ${cart.map((item) => item.genericBrandName).join(', ')}`)}
+              />
               {showUpload && (
                 <div className="rounded-2xl border border-green-800 bg-green-950 p-4">
                   <p className="mb-3 text-sm font-bold text-green-300">📋 Upload a valid prescription to continue checkout</p>

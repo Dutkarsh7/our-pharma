@@ -1,5 +1,9 @@
 import React from 'react';
 
+interface ExpertConsultProps {
+  onBookMedicalConsultation: () => void;
+}
+
 interface Expert {
   name: string;
   clinic: string;
@@ -62,7 +66,7 @@ const experts: Expert[] = [
   }
 ];
 
-const ExpertConsult: React.FC = () => {
+const ExpertConsult: React.FC<ExpertConsultProps> = ({ onBookMedicalConsultation }) => {
   return (
     <section className="min-h-screen bg-[#0B1F1C] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
@@ -142,8 +146,11 @@ const ExpertConsult: React.FC = () => {
                   per session • 30 minutes
                 </p>
               </div>
-              <button className="rounded-xl bg-green-600 px-6 py-3 font-bold text-white transition-all hover:bg-green-500">
-                Book Now →
+              <button
+                onClick={expert.type === 'medical' ? onBookMedicalConsultation : undefined}
+                className={`rounded-xl px-6 py-3 font-bold text-white transition-all ${expert.type === 'medical' ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}
+              >
+                {expert.type === 'medical' ? 'Book Now →' : 'Coming Soon'}
               </button>
             </div>
 

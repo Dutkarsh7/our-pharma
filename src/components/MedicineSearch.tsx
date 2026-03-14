@@ -4,6 +4,7 @@ import { Language, Theme } from '../../types';
 
 interface MedicineSearchProps {
   onAddToCart: (medicine: Medicine, selectedType: 'brand' | 'generic') => void;
+  onBookMedicalConsultation: (reason?: string) => void;
   theme: Theme;
   language: Language;
 }
@@ -81,7 +82,7 @@ const createMedicineImage = (brandName: string): string => {
 
 const PAGE_SIZE = 20;
 
-const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, theme, language }) => {
+const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedicalConsultation, theme, language }) => {
   const [query, setQuery] = useState('');
   const [chronicOnly, setChronicOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -117,8 +118,16 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, theme, lan
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 pb-24 pt-10">
-      <div className="mb-4 rounded-xl border border-green-800 bg-green-950 p-3 text-xs text-green-400">
-        💊 Generic alternatives have identical active ingredients. AI accuracy ~95%. Consult your doctor before switching medicines.
+      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-green-800 bg-green-950 p-3 text-xs text-green-400 sm:flex-row sm:items-center sm:justify-between">
+        <p>
+          💊 Generic alternatives have identical active ingredients. AI accuracy ~95%. Consult your doctor before switching medicines.
+        </p>
+        <button
+          onClick={() => onBookMedicalConsultation('General medical consultation before switching medicines')}
+          className="rounded-lg bg-[#16a34a] px-4 py-2 text-xs font-bold text-white transition hover:bg-green-500"
+        >
+          Schedule Dr. Dhingra
+        </button>
       </div>
 
       <div className={`rounded-2xl p-6 backdrop-blur-lg ${isDark ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-white shadow-sm'}`}>

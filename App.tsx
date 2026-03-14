@@ -12,9 +12,11 @@ import Auth from './components/Auth';
 import Checkout from './components/Checkout';
 import ProfileEditor from './components/ProfileEditor';
 import ExpertConsult from './components/ExpertConsult';
+import ConsultationBooking from './components/ConsultationBooking';
+import MedicineCard from './components/MedicineCard';
 import MedicineSearch from './src/components/MedicineSearch';
 import ChatBot from './components/ChatBot.tsx';
-import { Medicine as CatalogMedicine } from './src/data/medicines';
+import { medicines, Medicine as CatalogMedicine } from './src/data/medicines';
 import { supabase } from './src/lib/supabase';
 
 const MOST_USED_INDIAN_LANGUAGES: Language[] = ['hi', 'bn', 'mr', 'te', 'ta'];
@@ -164,6 +166,28 @@ const founders = [
   }
 ];
 
+const FEATURED_MEDICINE_NAMES = [
+  'Crocin 650',
+  'Augmentin 625',
+  'Glycomet 500',
+  'Lantus Solostar',
+  'Human Mixtard 70/30',
+  'Telma 40',
+];
+
+const featuredGridVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.08 }
+  },
+};
+
+const featuredCardVariants = {
+  hidden: { opacity: 0, y: 26 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.36, ease: 'easeOut' } },
+};
+
 const FounderAvatar: React.FC<{ name: string; image?: string; className?: string }> = ({ name, image, className = '' }) => {
   const [hasImageError, setHasImageError] = useState(false);
 
@@ -203,6 +227,8 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [authPrompt, setAuthPrompt] = useState('');
+  const [consultationReason, setConsultationReason] = useState('General medical consultation');
+  const featuredMedicines = medicines.filter((medicine) => FEATURED_MEDICINE_NAMES.includes(medicine.brand_name));
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -409,6 +435,11 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, user: null, view: 'landing' }));
   };
 
+  const openMedicalConsultation = (reason?: string) => {
+    setConsultationReason(reason?.trim() || 'General medical consultation');
+    setState((prev) => ({ ...prev, view: 'consultation' }));
+  };
+
   const setView = (v: ViewState) => setState(prev => ({ ...prev, view: v }));
 
   const reset = () => {
@@ -532,13 +563,19 @@ const App: React.FC = () => {
 
         {state.view === 'medicines' && (
           <motion.div key="medicines" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
-            <MedicineSearch onAddToCart={handleAddCatalogToCart} theme={state.theme} language={state.language} />
+            <MedicineSearch onAddToCart={handleAddCatalogToCart} onBookMedicalConsultation={openMedicalConsultation} theme={state.theme} language={state.language} />
           </motion.div>
         )}
 
         {state.view === 'experts' && (
           <motion.div key="experts" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
-            <ExpertConsult />
+            <ExpertConsult onBookMedicalConsultation={() => openMedicalConsultation('Direct medical consultation with Dr. Anil Dhingra')} />
+          </motion.div>
+        )}
+
+        {state.view === 'consultation' && (
+          <motion.div key="consultation" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
+            <ConsultationBooking theme={state.theme} onClose={() => setView('experts')} reason={consultationReason} />
           </motion.div>
         )}
 
@@ -569,6 +606,28 @@ const App: React.FC = () => {
                 <p className={`mb-8 max-w-2xl text-sm font-semibold leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
                   {t.serviceability}
                 </p>
+
+                <motion.div
+                  variants={featuredGridVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="mb-10"
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className={`text-xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>
+                      Featured Medicines
+                    </h3>
+                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#16a34a]">Top picks</span>
+                  </div>
+                  <motion.div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" variants={featuredGridVariants}>
+                    {featuredMedicines.map((medicine) => (
+                      <motion.div key={medicine.id} variants={featuredCardVariants}>
+                        <MedicineCard medicine={medicine} onAddCatalogToCart={handleAddCatalogToCart} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </motion.div>
+
                 <div className="grid gap-4 sm:grid-cols-3">
                   {[
                     { icon: '📤', title: 'Upload Prescription', desc: 'Drop your prescription and start comparison instantly.' },
@@ -793,6 +852,7 @@ const App: React.FC = () => {
               onRemove={removeFromCart}
               onClose={() => setView(state.result ? 'analysis' : 'landing')}
               onClearCart={() => setState(prev => ({ ...prev, cart: [] }))}
+              onBookMedicalConsultation={openMedicalConsultation}
             />
           </motion.div>
         )}
