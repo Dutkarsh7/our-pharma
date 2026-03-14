@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BadgeCheck, Building2, Capsule, CircleAlert, IndianRupee, ShieldCheck, X } from 'lucide-react';
+import { BadgeCheck, Building2, Pill, CircleAlert, IndianRupee, ShieldCheck, X } from 'lucide-react';
 import type { Medicine as PrescriptionMedicine } from '../types';
 import type { Medicine as CatalogMedicine } from '../src/data/medicines';
 
@@ -148,7 +148,7 @@ const CatalogMedicineCard: React.FC<CatalogProps> = ({ medicine, onAddCatalogToC
                 <div className="space-y-6">
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-3xl border border-slate-200 p-5">
-                      <div className="mb-3 flex items-center gap-2 text-slate-500"><Capsule className="h-4 w-4 text-teal-600" /><span className="text-[11px] font-black uppercase tracking-[0.24em]">Composition</span></div>
+                      <div className="mb-3 flex items-center gap-2 text-slate-500"><Pill className="h-4 w-4 text-teal-600" /><span className="text-[11px] font-black uppercase tracking-[0.24em]">Composition</span></div>
                       <p className="text-lg font-black text-slate-900">{medicine.generic_name}</p>
                     </div>
                     <div className="rounded-3xl border border-slate-200 p-5">
