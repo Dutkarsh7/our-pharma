@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { RefreshCw, ShieldCheck, Truck, Upload } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { AppState, ViewState, User, Medicine as PrescriptionMedicine, CartItem, Language, Theme } from './types';
 import { analyzePrescription } from './services/geminiService';
@@ -464,7 +465,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${state.theme === 'dark' ? 'bg-[#0B1F1C] text-[#F7FAFC]' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${state.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'}`}>
       <Header 
         onSignInClick={() => setView('login')} 
         user={state.user} 
@@ -498,7 +499,7 @@ const App: React.FC = () => {
               onClick={() => setView('landing')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'landing'
-                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  ? 'bg-blue-600 text-white'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -508,7 +509,7 @@ const App: React.FC = () => {
               onClick={() => setView('medicines')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'medicines'
-                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  ? 'bg-blue-600 text-white'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -518,7 +519,7 @@ const App: React.FC = () => {
               onClick={() => setView('experts')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'experts'
-                  ? 'bg-[#00D084] text-[#0B1F1C]'
+                  ? 'bg-blue-600 text-white'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -528,14 +529,14 @@ const App: React.FC = () => {
           {session ? (
             <button
               onClick={handleLogout}
-              className="min-h-11 rounded-full border border-[#00D084] bg-[#00D084] px-4 py-2 text-xs font-black uppercase tracking-widest text-[#0B1F1C] transition duration-200 hover:scale-105 hover:bg-transparent hover:text-[#00D084]"
+              className="min-h-11 rounded-full border border-blue-600 bg-blue-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white transition duration-200 hover:bg-blue-700"
             >
               {t.logout}
             </button>
           ) : (
             <button
               onClick={() => setView('login')}
-              className="min-h-11 rounded-full border border-[#00D084] bg-transparent px-4 py-2 text-xs font-black uppercase tracking-widest text-[#00D084] transition duration-200 hover:scale-105 hover:bg-[#00D084] hover:text-[#0B1F1C]"
+              className="min-h-11 rounded-full border border-blue-600 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-widest text-blue-600 transition duration-200 hover:bg-blue-600 hover:text-white"
             >
               {t.login}
             </button>
@@ -581,19 +582,19 @@ const App: React.FC = () => {
 
         {state.view === 'landing' && (
           <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="relative overflow-hidden pb-40 pt-24">
-            <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(0,208,132,0.22),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_58%)]'}`}></div>
+            <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.22),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(13,148,136,0.12),_transparent_58%)]'}`}></div>
             <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
               <div className="pt-10 lg:pt-16">
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#48BB78]/40 bg-[#48BB78]/20 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#48BB78]">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.32, ease: 'easeOut' }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+                  <span className="h-2 w-2 rounded-full bg-blue-600"></span>
                   {t.delivery}
                 </motion.div>
                 <div className={`mb-6 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white/80 text-slate-600'}`}>
                   Delivering to: {locationLabel}
                 </div>
-                <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 200, damping: 22 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#E2E8F0]' : 'bg-gradient-to-b from-slate-900 to-slate-700'}`}>
+                <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 160, damping: 24 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#CBD5E1]' : 'bg-gradient-to-b from-slate-900 to-slate-700'}`}>
                   {t.tagline1} <br />
-                  <span className="text-[#00D084]">{t.tagline2}</span>
+                  <span className="text-blue-600">{t.tagline2}</span>
                 </motion.h1>
                 <div className="mb-12 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.22em]">
                   <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Exact Salt Mapping</span>
@@ -630,19 +631,21 @@ const App: React.FC = () => {
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   {[
-                    { icon: '📤', title: 'Upload Prescription', desc: 'Drop your prescription and start comparison instantly.' },
-                    { icon: '🔄', title: 'Save on Identical Salts', desc: 'Switch from branded to identical generic molecules safely.' },
-                    { icon: '🚀', title: '2-Hour Doorstep Fulfillment', desc: 'Hyperlocal delivery pipeline for faster medicine access.' },
+                    { icon: Upload, title: 'Upload Prescription', desc: 'Drop your prescription and start comparison instantly.' },
+                    { icon: RefreshCw, title: 'Save on Identical Salts', desc: 'Switch from branded to identical generic molecules safely.' },
+                    { icon: Truck, title: '2-Hour Doorstep Fulfillment', desc: 'Hyperlocal delivery pipeline for faster medicine access.' },
                   ].map((card, i) => (
                     <motion.div
                       key={card.title}
                       initial={{ opacity: 0, y: 28 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.28 + i * 0.1, type: 'spring', stiffness: 240, damping: 22 }}
-                      whileHover={{ y: -4, transition: { duration: 0.22 } }}
-                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-sm'}`}
+                      transition={{ delay: 0.24 + i * 0.08, type: 'spring', stiffness: 150, damping: 24 }}
+                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-white/95 shadow-sm'}`}
                     >
-                      <p className="text-2xl">{card.icon}</p>
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${state.theme === 'dark' ? 'bg-blue-950/40 text-blue-300' : 'bg-blue-50 text-blue-600'}`}>
+                        <card.icon className="h-6 w-6" />
+                      </div>
                       <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>{card.title}</p>
                       <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>{card.desc}</p>
                     </motion.div>
@@ -651,25 +654,25 @@ const App: React.FC = () => {
               </div>
 
               <div className="relative mt-4 lg:mt-0">
-                <div className={`rounded-2xl p-8 backdrop-blur-xl ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-lg shadow-emerald-100/40'}`}>
-                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#00D084]">Pharmacy Control Tower</p>
+                <div className={`rounded-2xl p-8 backdrop-blur-xl ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-white/95 shadow-lg shadow-slate-200/60'}`}>
+                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-teal-600">Pharmacy Control Tower</p>
                   <h2 className={`text-3xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Generic-first care without losing trust.</h2>
                   <p className={`mt-4 text-sm font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
                     The experience is designed to show the original medicine, the identical salt, the savings, and the fulfillment promise in one clean decision flow.
                   </p>
 
                   <div className="mt-8 space-y-4">
-                    <div className={`rounded-2xl p-5 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-slate-50'}`}>
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#00D084]">What the customer sees</p>
+                    <div className={`rounded-2xl p-5 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-slate-50'}`}>
+                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-teal-600">What the customer sees</p>
                       <div className="mt-3 flex items-center justify-between">
                         <div>
                           <p className={`text-lg font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Branded vs Generic</p>
                           <p className={`text-xs font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Original brand, identical molecule, and savings in one place.</p>
                         </div>
-                        <span className="rounded-full border border-[#48BB78]/40 bg-[#48BB78]/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#48BB78]">Verified</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200"><ShieldCheck className="h-3 w-3" />Verified</span>
                       </div>
                     </div>
-                    <div className="rounded-2xl border border-[#00D084] bg-[#00D084] p-5 text-[#0B1F1C]">
+                    <div className="rounded-2xl border border-blue-600 bg-blue-600 p-5 text-white">
                       <p className="text-[10px] font-black uppercase tracking-[0.28em]">Why it works</p>
                       <p className="mt-3 text-sm font-medium leading-relaxed">This positions the product as a one-stop pharmacy: upload, compare, substitute, cart, and checkout without leaving the same flow.</p>
                     </div>
