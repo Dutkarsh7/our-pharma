@@ -46,6 +46,7 @@ interface SpeechRecognitionLike {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives?: number;
   onresult: ((event: SpeechRecognitionEventLike) => void) | null;
   onerror: ((event: Event) => void) | null;
   onend: (() => void) | null;
@@ -90,6 +91,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'Could not extract text from this image. Please upload a clearer photo.',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -114,6 +118,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'Image से text extract नहीं हो पाया। कृपया clearer photo upload करें।',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -138,6 +145,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'Image থেকে text extract করা যায়নি। পরিষ্কার ছবি দিন।',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -162,6 +172,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'Image मधून मजकूर काढता आला नाही. स्पष्ट फोटो द्या.',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -186,6 +199,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'ఈ image నుండి text తీసుకోలేకపోయాం. స్పష్టమైన ఫోటో ఇవ్వండి.',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -210,6 +226,9 @@ const COPY = {
     ticketSuccess: (id: string) => `🎫 Support ticket #${id} created. We'll resolve this within 24 hours.`,
     analyzing: 'Analyzing image with Mitra AI...',
     voiceUnsupported: 'Voice input works in Chrome/Edge only.',
+    voiceInsecureContext: 'Voice input requires HTTPS or localhost.',
+    voicePermissionDenied: 'Microphone access was blocked. Please allow mic permission and try again.',
+    voiceNoSpeech: 'No speech detected. Please speak a bit louder and try again.',
     imageError: 'இந்த image-இல் இருந்து text எடுக்க முடியவில்லை. தெளிவான புகைப்படம் தரவும்.',
     uploadHint: 'Attach prescription image',
     newConversation: 'New conversation',
@@ -243,12 +262,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const [callbackForm, setCallbackForm] = useState<CallbackForm>({ name: '', phone: '', issue: '' });
   const [ticketForm, setTicketForm] = useState<TicketForm>({ issue: '' });
   const [voiceLang, setVoiceLang] = useState<'hi-IN' | 'en-IN'>(language === 'hi' ? 'hi-IN' : 'en-IN');
+  const [voiceError, setVoiceError] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(false);
+  const manualStopRef = useRef(false);
+  const finalVoiceTranscriptRef = useRef('');
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -337,8 +359,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     }
   };
 
-  const toggleVoice = () => {
+  const toggleVoice = async () => {
     if (isListening) {
+      manualStopRef.current = true;
       recognitionRef.current?.stop();
       setIsListening(false);
       return;
@@ -346,14 +369,37 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
 
     const SpeechRecognitionCtor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!SpeechRecognitionCtor) {
-      pushMessage({ role: 'bot', content: copy.voiceUnsupported, type: 'text' });
+      setVoiceError(copy.voiceUnsupported);
       return;
     }
+
+    if (!window.isSecureContext) {
+      setVoiceError(copy.voiceInsecureContext);
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setVoiceError(copy.voiceUnsupported);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+    } catch {
+      setVoiceError(copy.voicePermissionDenied);
+      return;
+    }
+
+    setVoiceError('');
+    manualStopRef.current = false;
+    finalVoiceTranscriptRef.current = '';
 
     const recognition = new SpeechRecognitionCtor();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = voiceLang;
+    recognition.maxAlternatives = 1;
 
     recognition.onresult = (event: SpeechRecognitionEventLike) => {
       let finalText = '';
@@ -377,22 +423,42 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
       }
 
       if (finalText.trim()) {
+        finalVoiceTranscriptRef.current = finalText.trim();
         setVoiceLang(detectHindiScript(finalText) ? 'hi-IN' : 'en-IN');
       }
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (event: Event) => {
+      const errorEvent = event as Event & { error?: string };
+      if (errorEvent.error === 'not-allowed' || errorEvent.error === 'service-not-allowed') {
+        setVoiceError(copy.voicePermissionDenied);
+      } else if (errorEvent.error === 'no-speech') {
+        setVoiceError(copy.voiceNoSpeech);
+      }
       setIsListening(false);
     };
 
     recognition.onend = () => {
       setIsListening(false);
+
+      const transcript = finalVoiceTranscriptRef.current.trim();
+      if (!manualStopRef.current && transcript && !isLoading && !uploadBusy) {
+        void sendMessage(transcript);
+      }
+
+      manualStopRef.current = false;
+      finalVoiceTranscriptRef.current = '';
       setTimeout(() => inputRef.current?.focus(), 60);
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
+    try {
+      recognition.start();
+      setIsListening(true);
+    } catch {
+      setVoiceError(copy.voicePermissionDenied);
+      setIsListening(false);
+    }
   };
 
   const handleImageFile = async (file: File) => {
@@ -513,6 +579,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     setShowCallbackForm(false);
     setShowTicketForm(false);
     setInputText('');
+    setVoiceError('');
   };
 
   const smallInputClass = `min-h-10 w-full rounded-xl px-3 py-2 text-xs outline-none transition focus:ring-1 focus:ring-[#00D084] ${
@@ -522,14 +589,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   }`;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-3 left-3 right-3 z-50 flex flex-col items-stretch gap-3 sm:bottom-6 sm:left-auto sm:right-6 sm:items-end">
       {isOpen && (
         <div
-          className={`flex h-[600px] w-[380px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-3xl shadow-2xl ${
-            isDark ? 'border border-white/10 bg-[#0A1A17]' : 'border border-slate-200 bg-slate-50'
+          className={`flex h-[78dvh] max-h-[680px] w-full max-w-full flex-col overflow-hidden rounded-2xl shadow-2xl backdrop-blur-sm sm:h-[600px] sm:w-[390px] sm:rounded-3xl ${
+            isDark ? 'border border-white/10 bg-[#081B18]' : 'border border-slate-200 bg-[#f6fbff]'
           }`}
         >
-          <div className="flex shrink-0 items-center gap-3 bg-[#00D084] px-4 py-3.5">
+          <div className="relative flex shrink-0 items-center gap-2.5 bg-gradient-to-r from-[#00D084] via-[#5de2b6] to-[#c4f3df] px-3 py-3.5 sm:gap-3 sm:px-4">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.6),transparent_45%)]" />
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0B1F1C]/20 text-[#0B1F1C] font-black text-base select-none">
               M
             </div>
@@ -582,16 +650,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3" style={{ background: isDark ? 'rgba(11,31,28,0.7)' : '#f8fafc' }}>
+          <div className="flex-1 overflow-y-auto space-y-3 px-3 py-3 sm:px-4 sm:py-4" style={{ background: isDark ? 'linear-gradient(180deg, rgba(11,31,28,0.7) 0%, rgba(7,18,16,0.9) 100%)' : 'linear-gradient(180deg, #f8fbff 0%, #eff9f2 100%)' }}>
             {messages.map((msg, idx) => (
               <div key={msg.id}>
                 {idx === 0 && msg.role === 'bot' && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     {copy.quickLabels.map((label, qi) => (
                       <button
                         key={label}
                         onClick={() => handleQuickAction(qi)}
-                        className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition hover:bg-[#00D084] hover:text-[#0B1F1C] hover:border-[#00D084] ${
+                        className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition hover:-translate-y-0.5 hover:bg-[#00D084] hover:text-[#0B1F1C] hover:border-[#00D084] ${
                           isDark ? 'border-white/20 text-[#A0AEC0]' : 'border-slate-300 text-slate-600'
                         }`}
                       >
@@ -624,7 +692,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                       </div>
                     )}
                     <div
-                      className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                      className={`max-w-[84%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed sm:max-w-[75%] ${
                         msg.role === 'user'
                           ? 'rounded-br-sm bg-[#00D084] text-[#0B1F1C] font-semibold'
                           : isDark
@@ -662,9 +730,9 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
           </div>
 
           {showCallbackForm && (
-            <div className={`shrink-0 border-t px-4 py-3 space-y-2 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+            <div className={`shrink-0 border-t px-3 py-3 space-y-2 sm:px-4 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
               <p className="text-[10px] font-black uppercase tracking-widest text-[#00D084]">{copy.callbackTitle}</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <input
                   value={callbackForm.name}
                   onChange={(event) => setCallbackForm((prev) => ({ ...prev, name: event.target.value }))}
@@ -696,7 +764,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
           )}
 
           {showTicketForm && (
-            <div className={`shrink-0 border-t px-4 py-3 space-y-2 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+            <div className={`shrink-0 border-t px-3 py-3 space-y-2 sm:px-4 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
               <p className="text-[10px] font-black uppercase tracking-widest text-[#00D084]">{copy.ticketTitle}</p>
               <textarea
                 value={ticketForm.issue}
@@ -714,7 +782,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
             </div>
           )}
 
-          <div className={`flex shrink-0 items-center gap-2 border-t px-3 py-3 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
+          <div className={`flex shrink-0 items-center gap-2 border-t px-3 py-3 sm:px-4 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
             <button
               onClick={toggleVoice}
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition ${
@@ -750,11 +818,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                     : 'border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400'
                 }`}
               />
-              {isListening && (
-                <p className={`mt-1 text-[10px] font-semibold ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
-                  {copy.listeningActive}
-                </p>
-              )}
+                {(isListening || voiceError) && (
+                  <p className={`mt-1 text-[10px] font-semibold ${voiceError ? 'text-rose-500' : isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
+                    {voiceError || copy.listeningActive}
+                  </p>
+                )}
             </div>
 
             <button
@@ -775,7 +843,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
           setIsOpen((open) => !open);
           setHasUnread(false);
         }}
-        className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00D084] text-[#0B1F1C] shadow-2xl shadow-[#00D084]/40 transition duration-300 hover:scale-110 hover:brightness-110"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00D084] text-[#0B1F1C] shadow-2xl shadow-[#00D084]/40 transition duration-300 hover:scale-110 hover:brightness-110"
         aria-label="Open chat assistant"
       >
         {isOpen ? (

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Medicine } from '../types';
 
 interface MedicineCardProps {
@@ -20,7 +21,14 @@ const MedicineCard: React.FC<MedicineCardProps> = ({ med, onAddToCart }) => {
   };
 
   return (
-    <div className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg transition-all duration-500 hover:-translate-y-1">
+    <motion.div
+      className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+      whileHover={{ y: -4, transition: { duration: 0.22 } }}
+    >
       <div className="p-10 flex flex-col xl:flex-row gap-12">
         <div className="xl:w-1/4 flex flex-col justify-center border-b border-emerald-100 pb-8 xl:border-b-0 xl:border-r xl:pb-0 dark:border-emerald-950/40">
           <div className="inline-flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-[0.3em] mb-4">
@@ -82,7 +90,7 @@ const MedicineCard: React.FC<MedicineCardProps> = ({ med, onAddToCart }) => {
               <p className="text-[11px] text-[#A0AEC0] font-bold uppercase tracking-widest">Express: <span className="text-[#48BB78]">2 Hours Delivery</span></p>
            </div>
            
-           <button 
+          <motion.button 
              onClick={handleAdd}
              disabled={med.isNarcotic}
              className={`w-full py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl active:scale-95 ${
@@ -90,11 +98,13 @@ const MedicineCard: React.FC<MedicineCardProps> = ({ med, onAddToCart }) => {
                   ? 'bg-[#00D084] text-[#0B1F1C]' 
                : med.isNarcotic 
                     ? 'bg-white/10 text-[#A0AEC0] cursor-not-allowed shadow-none' 
-                  : 'border border-[#00D084] bg-[#00D084] text-[#0B1F1C] hover:scale-105 hover:bg-transparent hover:text-[#00D084]'
+                  : 'border border-[#00D084] bg-[#00D084] text-[#0B1F1C]'
              }`}
+             whileHover={!med.isNarcotic ? { scale: 1.05 } : {}}
+             whileTap={!med.isNarcotic ? { scale: 0.95 } : {}}
            >
               {isAdded ? 'Added ✓' : med.isNarcotic ? 'Restricted' : 'Add To Pharmacy Cart'}
-           </button>
+           </motion.button>
            
            <button 
              onClick={() => setIsExpanded(!isExpanded)}
@@ -106,7 +116,14 @@ const MedicineCard: React.FC<MedicineCardProps> = ({ med, onAddToCart }) => {
       </div>
 
       {isExpanded && (
-        <div className="px-10 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10 animate-in slide-in-from-top duration-500">
+        <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.32, ease: 'easeInOut' }}
+          className="overflow-hidden px-10 pb-10 grid grid-cols-1 md:grid-cols-2 gap-10"
+        >
             <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-lg">
               <h5 className="mb-4 text-[10px] font-black uppercase tracking-widest text-[#A0AEC0]">How it works</h5>
               <p className="text-sm leading-relaxed font-medium text-[#A0AEC0]">{med.uses}</p>
@@ -117,9 +134,10 @@ const MedicineCard: React.FC<MedicineCardProps> = ({ med, onAddToCart }) => {
                The active molecule <span className="font-bold text-[#00D084]">{med.activeSalt}</span> in {med.genericBrandName} matches the pharmacopoeia standards of {med.originalName}. It undergoes the same dissolution and metabolic path in the human body.
               </p>
            </div>
-        </div>
+        </motion.div>
+        </AnimatePresence>
       )}
-    </div>
+    </motion.div>
   );
 };
 

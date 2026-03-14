@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Language } from '../types';
 
 interface FileUploaderProps {
@@ -76,7 +77,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isAnalyzing, lang
   };
 
   return (
-    <div className="max-w-4xl mx-auto mt-16 px-6">
+    <motion.div
+      className="max-w-4xl mx-auto mt-16 px-6"
+      initial={{ opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
       <div 
         className={`relative overflow-hidden border-[3px] border-dashed rounded-[60px] p-20 transition-all text-center ${
           dragActive 
@@ -124,7 +130,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isAnalyzing, lang
       </div>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex items-start gap-6 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-lg">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="flex items-start gap-6 rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-lg"
+        >
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#00D084] text-[#0B1F1C]">
              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
@@ -132,8 +143,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isAnalyzing, lang
             <h4 className="mb-2 text-lg font-black text-[#F7FAFC]">{t.oneCartTitle}</h4>
             <p className="text-xs font-medium leading-relaxed text-[#A0AEC0]">{t.oneCartDesc}</p>
           </div>
-        </div>
-        <div className="flex items-start gap-6 rounded-2xl border border-white/10 bg-white/5 p-8 text-[#F7FAFC] backdrop-blur-lg">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="flex items-start gap-6 rounded-2xl border border-white/10 bg-white/5 p-8 text-[#F7FAFC] backdrop-blur-lg"
+        >
           <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#00D084]/20 text-[#00D084]">
              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3a9.99 9.99 0 00-4.534 1.08l.094.053m0 0c-1.287.721-2.432 1.677-3.396 2.809m16.422 13.844A9.904 9.904 0 0112 21c-3.158 0-6.017-1.467-7.893-3.758" /></svg>
           </div>
@@ -141,9 +157,9 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isAnalyzing, lang
             <h4 className="mb-2 text-lg font-black">{t.verifiedTitle}</h4>
             <p className="text-xs font-medium leading-relaxed text-[#A0AEC0]">{t.verifiedDesc}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

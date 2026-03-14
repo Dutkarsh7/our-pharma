@@ -1,5 +1,6 @@
 
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { PrescriptionAnalysis, Medicine } from '../types';
 import MedicineCard from './MedicineCard';
 
@@ -20,7 +21,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data, onReset, onAddToC
   }, [data.medicines]);
 
   return (
-    <div className="max-w-7xl mx-auto mt-12 px-6 pb-32 animate-in fade-in duration-700">
+    <motion.div
+      className="max-w-7xl mx-auto mt-12 px-6 pb-32"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-16">
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-10 backdrop-blur-lg transition-colors lg:col-span-2">
           <div className="relative z-10">
@@ -88,8 +94,15 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data, onReset, onAddToC
       </div>
 
       <div className="space-y-20">
-        {Object.entries(groupedMeds).map(([category, meds]: [string, Medicine[]]) => (
-          <div key={category} className="space-y-8">
+        {Object.entries(groupedMeds).map(([category, meds]: [string, Medicine[]], catIdx) => (
+          <motion.div
+            key={category}
+            className="space-y-8"
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ delay: catIdx * 0.07, duration: 0.4 }}
+          >
             <div className="flex items-center gap-4">
               <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight capitalize">{category}</h3>
               <div className="h-px flex-grow bg-emerald-100 dark:bg-slate-800"></div>
@@ -100,10 +113,10 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data, onReset, onAddToC
                 <MedicineCard key={idx} med={med} onAddToCart={onAddToCart} />
               ))}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

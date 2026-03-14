@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { User, Language, Theme, ViewState } from '../types';
 
 interface HeaderProps {
@@ -55,14 +56,18 @@ const Header: React.FC<HeaderProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={onLogoClick}>
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00D084] transition-transform hover:scale-105">
+            <motion.div
+              className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00D084]"
+              whileHover={{ scale: 1.1, rotate: 3 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <span className="mb-1 text-2xl font-black text-[#0B1F1C]">G</span>
               <div className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-[#F7FAFC] ring-2 ring-[#0B1F1C]">
                 <svg className="h-4 w-4 text-[#00D084]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8.15,20C11.33,20 14.25,18.23 15.82,15.5L13.12,13.03C15.84,11.4 17,8 17,8M8,18C5,18 2,15 2,12C2,7 5,3 12,2C11,5 11,8 8,11C5,14 5,18 8,18Z" />
                 </svg>
               </div>
-            </div>
+            </motion.div>
             <div className="flex flex-col">
               <span className={`text-2xl font-black leading-none tracking-tighter ${theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Our<span className="text-[#00D084]">Pharma</span></span>
               <span className={`mt-1 text-[10px] font-bold uppercase tracking-[0.28em] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>One Stop Generic Pharmacy</span>
@@ -88,7 +93,10 @@ const Header: React.FC<HeaderProps> = ({
                 {isDetectingLocation ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#00D084] border-t-transparent" />
                 ) : (
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 2v2m0 16v2m8-10h2M2 12h2m13.657-5.657l1.414-1.414M4.929 19.071l1.414-1.414m11.314 1.414l1.414 1.414M4.929 4.929l1.414 1.414M12 7a5 5 0 100 10 5 5 0 000-10z" /></svg>
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
                 )}
               </button>
             </div>
@@ -149,37 +157,51 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            <button 
+            <motion.button 
               onClick={onCartClick}
-              className={`relative min-h-11 rounded-xl p-3 transition duration-200 hover:scale-105 hover:border-[#00D084] hover:text-[#00D084] ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-slate-200 bg-white text-slate-500'}`}
+              className={`relative min-h-11 rounded-xl p-3 transition duration-200 hover:border-[#00D084] hover:text-[#00D084] ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-slate-200 bg-white text-slate-500'}`}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#48BB78] text-[10px] font-black text-[#0B1F1C]">
+                <motion.span
+                  key={cartCount}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#48BB78] text-[10px] font-black text-[#0B1F1C]"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                >
                   {cartCount}
-                </span>
+                </motion.span>
               )}
-            </button>
+            </motion.button>
 
             {user ? (
-              <div className="flex items-center gap-3">
+              <button
+                onClick={() => onViewChange('profile')}
+                className="flex items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-[#00D084]/10"
+                title="Edit Profile"
+              >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full border font-bold ${theme === 'dark' ? 'border-white/10 bg-white/5 text-[#F7FAFC]' : 'border-emerald-100 bg-emerald-50 text-emerald-700'}`}>
                   {user.name.charAt(0)}
                 </div>
-                <div className="hidden md:flex flex-col">
+                <div className="hidden md:flex flex-col text-left">
                   <span className={`text-[10px] font-bold uppercase ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>Patient</span>
                   <span className={`text-sm font-bold ${theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>{user.name}</span>
                 </div>
-              </div>
+              </button>
             ) : (
-              <button 
+              <motion.button 
                 onClick={onSignInClick}
-                className="min-h-11 rounded-full border border-[#00D084] bg-[#00D084] px-6 py-2.5 text-sm font-bold text-[#0B1F1C] transition duration-200 hover:scale-105 hover:bg-transparent hover:text-[#00D084]"
+                className="min-h-11 rounded-full border border-[#00D084] bg-[#00D084] px-6 py-2.5 text-sm font-bold text-[#0B1F1C] transition duration-200 hover:bg-transparent hover:text-[#00D084]"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Sign In
-              </button>
+              </motion.button>
             )}
           </div>
         </div>

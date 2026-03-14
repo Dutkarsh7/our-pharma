@@ -37,7 +37,7 @@ export interface PrescriptionAnalysis {
   detectedCondition?: string;
 }
 
-export type ViewState = 'landing' | 'medicines' | 'analysis' | 'admin' | 'error' | 'login' | 'forgot-password' | 'checkout' | 'founders' | 'about';
+export type ViewState = 'landing' | 'medicines' | 'analysis' | 'admin' | 'error' | 'login' | 'forgot-password' | 'checkout' | 'founders' | 'about' | 'profile';
 
 export type Language = 'en' | 'hi' | 'bn' | 'mr' | 'te' | 'ta';
 export type Theme = 'light' | 'dark';

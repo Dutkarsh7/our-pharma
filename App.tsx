@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from '@supabase/supabase-js';
 import { AppState, ViewState, User, Medicine as PrescriptionMedicine, CartItem, Language, Theme } from './types';
 import { analyzePrescription } from './services/geminiService';
@@ -9,6 +10,7 @@ import AnalysisResult from './components/AnalysisResult';
 import AdminDashboard from './components/AdminDashboard';
 import Auth from './components/Auth';
 import Checkout from './components/Checkout';
+import ProfileEditor from './components/ProfileEditor';
 import MedicineSearch from './src/components/MedicineSearch';
 import ChatBot from './components/ChatBot.tsx';
 import { Medicine as CatalogMedicine } from './src/data/medicines';
@@ -219,12 +221,13 @@ const App: React.FC = () => {
       return;
     }
 
+    const metaName = session.user.user_metadata?.full_name;
     const nameFromEmail = session.user.email.split('@')[0];
     setState(prev => ({
       ...prev,
       user: {
         email: session.user.email ?? '',
-        name: nameFromEmail
+        name: metaName || nameFromEmail
       }
     }));
   }, [session]);
@@ -255,7 +258,7 @@ const App: React.FC = () => {
       async ({ coords }) => {
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}`,
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${coords.latitude}&lon=${coords.longitude}&zoom=18&addressdetails=1`,
             {
               headers: {
                 Accept: 'application/json'
@@ -264,10 +267,23 @@ const App: React.FC = () => {
           );
           const data = await response.json();
           const address = data?.address || {};
-          const city = address.city || address.town || address.village || address.state_district || 'Your City';
+
+          // Pick the most specific locality first (suburb/neighbourhood etc.)
+          const locality =
+            address.neighbourhood ||
+            address.quarter ||
+            address.suburb ||
+            address.road ||
+            address.village ||
+            address.town ||
+            address.city_district ||
+            address.city ||
+            address.state_district ||
+            'Your Area';
+
           const pincode = address.postcode || state.pincode;
 
-          setLocationLabel(`${city} ${pincode}`.trim());
+          setLocationLabel(`${locality} ${pincode}`.trim());
           setState(prev => ({ ...prev, pincode }));
         } catch (error) {
           console.error(error);
@@ -279,7 +295,7 @@ const App: React.FC = () => {
       () => {
         setIsDetectingLocation(false);
       },
-      { enableHighAccuracy: false, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
   };
 
@@ -479,8 +495,9 @@ const App: React.FC = () => {
           )}
         </div>
 
+        <AnimatePresence mode="sync">
         {(state.view === 'login' || state.view === 'forgot-password') && (
-          <div className="relative mx-auto mt-4 w-full max-w-7xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
+          <motion.div key="login" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }} className="relative mx-auto mt-4 w-full max-w-7xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
             <div className={`absolute inset-x-0 top-0 -z-10 h-72 rounded-3xl ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(0,208,132,0.2),_transparent_65%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_65%)]'}`}></div>
             {authPrompt && (
               <div className="mb-4 rounded-xl border border-[#48BB78]/30 bg-[#48BB78]/10 px-4 py-3 text-sm font-semibold text-[#48BB78]">
@@ -494,29 +511,31 @@ const App: React.FC = () => {
                 setState(prev => ({ ...prev, view: 'landing' }));
               }}
             />
-          </div>
+          </motion.div>
         )}
 
         {state.view === 'medicines' && (
-          <MedicineSearch onAddToCart={handleAddCatalogToCart} theme={state.theme} language={state.language} />
+          <motion.div key="medicines" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.38 }}>
+            <MedicineSearch onAddToCart={handleAddCatalogToCart} theme={state.theme} language={state.language} />
+          </motion.div>
         )}
 
         {state.view === 'landing' && (
-          <div className="relative overflow-hidden pb-40 pt-24 animate-in fade-in duration-700">
+          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="relative overflow-hidden pb-40 pt-24">
             <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(0,208,132,0.22),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_58%)]'}`}></div>
             <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
               <div className="pt-10 lg:pt-16">
-                <div className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#48BB78]/40 bg-[#48BB78]/20 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#48BB78]">
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-[#48BB78]/40 bg-[#48BB78]/20 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-[#48BB78]">
                   <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
                   {t.delivery}
-                </div>
+                </motion.div>
                 <div className={`mb-6 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white/80 text-slate-600'}`}>
                   Delivering to: {locationLabel}
                 </div>
-                <h1 className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#E2E8F0]' : 'bg-gradient-to-b from-slate-900 to-slate-700'}`}>
+                <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 200, damping: 22 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#E2E8F0]' : 'bg-gradient-to-b from-slate-900 to-slate-700'}`}>
                   {t.tagline1} <br />
                   <span className="text-[#00D084]">{t.tagline2}</span>
-                </h1>
+                </motion.h1>
                 <div className="mb-12 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.22em]">
                   <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Exact Salt Mapping</span>
                   <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Generic Price Discovery</span>
@@ -529,21 +548,24 @@ const App: React.FC = () => {
                   {t.serviceability}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <div className={`rounded-2xl p-6 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-sm'}`}>
-                    <p className="text-2xl">📤</p>
-                    <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Upload Prescription</p>
-                    <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Drop your prescription and start comparison instantly.</p>
-                  </div>
-                  <div className={`rounded-2xl p-6 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-sm'}`}>
-                    <p className="text-2xl">🔄</p>
-                    <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Save on Identical Salts</p>
-                    <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Switch from branded to identical generic molecules safely.</p>
-                  </div>
-                  <div className={`rounded-2xl p-6 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-sm'}`}>
-                    <p className="text-2xl">🚀</p>
-                    <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>2-Hour Doorstep Fulfillment</p>
-                    <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Hyperlocal delivery pipeline for faster medicine access.</p>
-                  </div>
+                  {[
+                    { icon: '📤', title: 'Upload Prescription', desc: 'Drop your prescription and start comparison instantly.' },
+                    { icon: '🔄', title: 'Save on Identical Salts', desc: 'Switch from branded to identical generic molecules safely.' },
+                    { icon: '🚀', title: '2-Hour Doorstep Fulfillment', desc: 'Hyperlocal delivery pipeline for faster medicine access.' },
+                  ].map((card, i) => (
+                    <motion.div
+                      key={card.title}
+                      initial={{ opacity: 0, y: 28 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.28 + i * 0.1, type: 'spring', stiffness: 240, damping: 22 }}
+                      whileHover={{ y: -4, transition: { duration: 0.22 } }}
+                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/90 shadow-sm'}`}
+                    >
+                      <p className="text-2xl">{card.icon}</p>
+                      <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>{card.title}</p>
+                      <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>{card.desc}</p>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
 
@@ -575,20 +597,20 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative z-10 mt-6">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="relative z-10 mt-6">
               <FileUploader onUpload={handleUpload} isAnalyzing={state.isAnalyzing} language={state.language} />
-            </div>
+            </motion.div>
 
-            <div className="mx-auto mt-24 flex max-w-5xl flex-wrap justify-center gap-12 opacity-80 transition-opacity">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.7 }} className="mx-auto mt-24 flex max-w-5xl flex-wrap justify-center gap-12">
               <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.scans}</span>
               <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.gmp}</span>
               <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.pharma}</span>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
 
         {state.view === 'about' && (
-          <div className="max-w-4xl mx-auto px-6 py-24 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <motion.div key="about" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }} className="max-w-4xl mx-auto px-6 py-24">
             <div className="text-center mb-16">
               <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-6">About Our Pharma</h1>
               <p className="text-[#48BB9F] font-black uppercase tracking-widest text-xs">Hyperlocal • Intelligent • Transparent</p>
@@ -660,15 +682,15 @@ const App: React.FC = () => {
             </div>
             
             <div className="mt-12 text-center">
-              <button onClick={() => setView('landing')} className="bg-[#48BB9F] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:brightness-110 transition shadow-lg shadow-emerald-900/20">
+              <motion.button onClick={() => setView('landing')} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }} className="bg-[#48BB9F] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:brightness-110 transition shadow-lg shadow-emerald-900/20">
                 Back to Scanner
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {state.view === 'founders' && (
-          <div className="max-w-7xl mx-auto px-6 py-24 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <motion.div key="founders" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }} className="max-w-7xl mx-auto px-6 py-24">
             <div className="text-center mb-20">
               <h1 className="text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4">The Minds Behind Our Pharma</h1>
               <p className="text-slate-400 dark:text-slate-500 max-w-xl mx-auto font-medium">A diverse team committed to democratizing healthcare access in India.</p>
@@ -676,7 +698,7 @@ const App: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
               {founders.map((founder, idx) => (
-                <div key={idx} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[48px] p-10 text-center shadow-2xl shadow-slate-100 dark:shadow-slate-950/30 group hover:border-[#48BB9F] transition-all duration-500 hover:-translate-y-2">
+                <motion.div key={idx} initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08, type: 'spring', stiffness: 240, damping: 22 }} whileHover={{ y: -6, transition: { duration: 0.22 } }} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[48px] p-10 text-center shadow-2xl shadow-slate-100 dark:shadow-slate-950/30 group hover:border-[#48BB9F] transition-colors duration-300">
                   <FounderAvatar
                     name={founder.name}
                     image={founder.image}
@@ -693,7 +715,7 @@ const App: React.FC = () => {
                       {founder.phone}
                     </a>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -701,49 +723,64 @@ const App: React.FC = () => {
                <div className="relative z-10">
                  <h2 className="text-4xl font-black tracking-tighter mb-6">Building for a Healthier India</h2>
                  <p className="mx-auto mb-12 max-w-2xl font-medium text-emerald-50/85">Established in 2024 with a vision of radical price transparency in the pharmaceutical sector. We are hyperlocal, bio-equivalent focused, and patient-first.</p>
-                 <button onClick={() => setView('landing')} className="rounded-3xl bg-white px-12 py-5 text-sm font-black uppercase tracking-widest text-emerald-700 shadow-2xl shadow-emerald-900/30 transition hover:brightness-110">
+                 <motion.button onClick={() => setView('landing')} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }} className="rounded-3xl bg-white px-12 py-5 text-sm font-black uppercase tracking-widest text-emerald-700 shadow-2xl shadow-emerald-900/30 transition hover:brightness-110">
                    Back to Home
-                 </button>
+                 </motion.button>
                </div>
                <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-white/10 blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {state.view === 'admin' && <AdminDashboard />}
 
         {state.view === 'error' && (
-          <div className="max-w-2xl mx-auto mt-24 p-16 bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-950/40 rounded-[60px] text-center shadow-[0_40px_110px_-70px_rgba(16,185,129,0.55)] transition-colors">
+          <motion.div key="error" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.35 }} className="max-w-2xl mx-auto mt-24 p-16 bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-950/40 rounded-[60px] text-center shadow-[0_40px_110px_-70px_rgba(16,185,129,0.55)] transition-colors">
             <div className="w-24 h-24 bg-rose-50 dark:bg-rose-900/20 rounded-[32px] flex items-center justify-center mx-auto mb-10 text-rose-500">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
             <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Scan Failed</h2>
             <p className="text-slate-400 dark:text-slate-500 mb-12 font-medium leading-relaxed">{state.error}</p>
-            <button 
+            <motion.button 
               onClick={reset}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.96 }}
               className="bg-emerald-600 text-white px-16 py-5 rounded-[24px] font-black uppercase tracking-widest hover:bg-emerald-700 transition shadow-2xl shadow-emerald-200 dark:shadow-emerald-900/20"
             >
               Try Again
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         )}
 
         {state.view === 'analysis' && state.result && (
-          <AnalysisResult 
-            data={state.result} 
-            onReset={reset} 
-            onAddToCart={addToCart}
-          />
+          <motion.div key="analysis" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}>
+            <AnalysisResult 
+              data={state.result} 
+              onReset={reset} 
+              onAddToCart={addToCart}
+            />
+          </motion.div>
         )}
 
         {state.view === 'checkout' && (
-          <Checkout 
-            cart={state.cart} 
-            onUpdateQuantity={updateQuantity}
-            onRemove={removeFromCart}
-            onClose={() => setView(state.result ? 'analysis' : 'landing')}
-          />
+          <motion.div key="checkout" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}>
+            <Checkout 
+              cart={state.cart}
+              theme={state.theme}
+              onUpdateQuantity={updateQuantity}
+              onRemove={removeFromCart}
+              onClose={() => setView(state.result ? 'analysis' : 'landing')}
+              onClearCart={() => setState(prev => ({ ...prev, cart: [] }))}
+            />
+          </motion.div>
         )}
+
+        {state.view === 'profile' && (
+          <motion.div key="profile" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }} className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+            <ProfileEditor theme={state.theme} onClose={() => setView('landing')} />
+          </motion.div>
+        )}
+        </AnimatePresence>
       </main>
 
       <footer className="border-t border-emerald-100 bg-white/70 py-24 text-slate-500 backdrop-blur dark:border-emerald-950/40 dark:bg-slate-950 dark:text-slate-400">
