@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Language, Theme } from '../types';
-import { chatWithPharmaBot, extractPrescriptionTextFromImage } from '../services/geminiService';
+import { extractPrescriptionTextFromImage } from '../services/geminiService';
 import { supabase } from '../src/lib/supabase';
 
 interface Message {
@@ -28,46 +28,9 @@ interface ChatBotProps {
   language: Language;
 }
 
-interface SpeechRecognitionAlternativeLike {
-  transcript: string;
-}
-
-interface SpeechRecognitionResultLike {
-  0: SpeechRecognitionAlternativeLike;
-  isFinal: boolean;
-  length: number;
-}
-
-interface SpeechRecognitionEventLike extends Event {
-  results: ArrayLike<SpeechRecognitionResultLike>;
-}
-
-interface SpeechRecognitionLike {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  maxAlternatives?: number;
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: ((event: Event) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-}
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-    SpeechRecognition?: SpeechRecognitionConstructor;
-  }
-}
-
 const uid = () => Math.random().toString(36).slice(2, 11);
 const ts = () => new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 const random4Digit = () => String(Math.floor(1000 + Math.random() * 9000));
-
-const ESCALATION_REPLY_KEYWORDS = ['cannot help', 'not sure', 'contact support', 'unable to', 'support ticket'];
 
 const COPY = {
   en: {
@@ -244,8 +207,6 @@ const renderBold = (text: string): React.ReactNode[] =>
       : <span key={i}>{part}</span>
   );
 
-const detectHindiScript = (value: string): boolean => /[\u0900-\u097F]/.test(value);
-
 const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const isDark = theme === 'dark';
   const copy = COPY[language as CopyLang] ?? COPY.en;
@@ -253,7 +214,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
@@ -261,16 +222,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [callbackForm, setCallbackForm] = useState<CallbackForm>({ name: '', phone: '', issue: '' });
   const [ticketForm, setTicketForm] = useState<TicketForm>({ issue: '' });
-  const [voiceLang, setVoiceLang] = useState<'hi-IN' | 'en-IN'>(language === 'hi' ? 'hi-IN' : 'en-IN');
-  const [voiceError, setVoiceError] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(false);
-  const manualStopRef = useRef(false);
-  const finalVoiceTranscriptRef = useRef('');
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -281,18 +237,11 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     setShowCallbackForm(false);
     setShowTicketForm(false);
     setInputText('');
-    setVoiceLang(language === 'hi' ? 'hi-IN' : 'en-IN');
   }, [language, copy.welcome]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading, uploadBusy]);
-
-  useEffect(() => {
-    return () => {
-      recognitionRef.current?.stop();
-    };
-  }, []);
+  }, [messages, isTyping, uploadBusy]);
 
   const pushMessage = (msg: Omit<Message, 'id' | 'time'>) => {
     const newMsg: Message = { ...msg, id: uid(), time: ts() };
@@ -332,133 +281,46 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     return ticketId;
   };
 
-  const handleEscalation = async (issue: string, botReply: string) => {
-    const ticketId = await saveTicket(issue, botReply);
-    pushMessage({ role: 'system', content: copy.ticketSuccess(ticketId), type: 'ticket', ticketId });
-    setCallbackForm((prev) => ({ ...prev, issue: issue || prev.issue }));
-    setShowTicketForm(false);
-    setShowCallbackForm(true);
-  };
-
-  const sendMessage = async (overrideText?: string) => {
-    const text = (overrideText ?? inputText).trim();
-    if (!text || isLoading || uploadBusy) return;
-
-    setInputText('');
-    pushMessage({ role: 'user', content: text, type: 'text' });
-    setIsLoading(true);
-
-    const { reply, shouldEscalate } = await chatWithPharmaBot(text, language);
-
-    setIsLoading(false);
-    pushMessage({ role: 'bot', content: reply, type: 'text' });
-
-    const escalationByReply = ESCALATION_REPLY_KEYWORDS.some((kw) => reply.toLowerCase().includes(kw));
-    if (shouldEscalate || escalationByReply) {
-      await handleEscalation(text, reply);
-    }
-  };
-
-  const toggleVoice = async () => {
-    if (isListening) {
-      manualStopRef.current = true;
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      return;
-    }
-
-    const SpeechRecognitionCtor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
-    if (!SpeechRecognitionCtor) {
-      setVoiceError(copy.voiceUnsupported);
-      return;
-    }
-
-    if (!window.isSecureContext) {
-      setVoiceError(copy.voiceInsecureContext);
-      return;
-    }
-
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setVoiceError(copy.voiceUnsupported);
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
-    } catch {
-      setVoiceError(copy.voicePermissionDenied);
-      return;
-    }
-
-    setVoiceError('');
-    manualStopRef.current = false;
-    finalVoiceTranscriptRef.current = '';
-
-    const recognition = new SpeechRecognitionCtor();
+  const startVoice = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { alert('Please use Chrome for voice input'); return; }
+    const recognition = new SR();
+    recognition.lang = 'hi-IN';
     recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = voiceLang;
-    recognition.maxAlternatives = 1;
-
-    recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      let finalText = '';
-      let interimText = '';
-
-      for (let i = 0; i < event.results.length; i += 1) {
-        const result = event.results[i];
-        const segment = result[0]?.transcript?.trim() ?? '';
-        if (!segment) continue;
-
-        if (result.isFinal) {
-          finalText += `${segment} `;
-        } else {
-          interimText += `${segment} `;
-        }
-      }
-
-      const merged = (finalText || interimText).trim();
-      if (merged) {
-        setInputText(merged);
-      }
-
-      if (finalText.trim()) {
-        finalVoiceTranscriptRef.current = finalText.trim();
-        setVoiceLang(detectHindiScript(finalText) ? 'hi-IN' : 'en-IN');
-      }
+    recognition.onresult = (e: any) => {
+      setInputText(e.results[0][0].transcript);
     };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    setIsListening(true);
+    recognition.start();
+  };
 
-    recognition.onerror = (event: Event) => {
-      const errorEvent = event as Event & { error?: string };
-      if (errorEvent.error === 'not-allowed' || errorEvent.error === 'service-not-allowed') {
-        setVoiceError(copy.voicePermissionDenied);
-      } else if (errorEvent.error === 'no-speech') {
-        setVoiceError(copy.voiceNoSpeech);
-      }
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-
-      const transcript = finalVoiceTranscriptRef.current.trim();
-      if (!manualStopRef.current && transcript && !isLoading && !uploadBusy) {
-        void sendMessage(transcript);
-      }
-
-      manualStopRef.current = false;
-      finalVoiceTranscriptRef.current = '';
-      setTimeout(() => inputRef.current?.focus(), 60);
-    };
-
-    recognitionRef.current = recognition;
+  const handleSend = async (msg: string) => {
+    if (!msg.trim()) return;
+    setMessages((prev) => [...prev, { id: uid(), time: ts(), role: 'user', type: 'text', content: msg }]);
+    setInputText('');
+    setIsTyping(true);
     try {
-      recognition.start();
-      setIsListening(true);
-    } catch {
-      setVoiceError(copy.voicePermissionDenied);
-      setIsListening(false);
+      const { GoogleGenerativeAI } = await import('@google/generative-ai');
+      const ai = new GoogleGenerativeAI((import.meta as any).env.VITE_GEMINI_API_KEY);
+      const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const result = await model.generateContent(
+        `You are OurPharma pharmacy assistant.
+       Rules:
+       - Reply in SAME language as user
+       - Hindi message = Hindi reply
+       - English message = English reply  
+       - Max 3-4 lines per reply
+       - Help with medicines, orders, prescriptions
+       - If cannot help, say pharmacist will call back
+       User message: ${msg}`
+      );
+      setMessages((prev) => [...prev, { id: uid(), time: ts(), role: 'bot', type: 'text', content: result.response.text() }]);
+    } catch (e) {
+      setMessages((prev) => [...prev, { id: uid(), time: ts(), role: 'bot', type: 'text', content: 'Sorry, please try again.' }]);
     }
+    setIsTyping(false);
   };
 
   const handleImageFile = async (file: File) => {
@@ -579,7 +441,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     setShowCallbackForm(false);
     setShowTicketForm(false);
     setInputText('');
-    setVoiceError('');
   };
 
   const smallInputClass = `min-h-10 w-full rounded-xl px-3 py-2 text-xs outline-none transition focus:ring-1 focus:ring-[#00D084] ${
@@ -713,7 +574,15 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
               </div>
             ))}
 
-            {(isLoading || uploadBusy) && (
+            {isTyping && (
+              <div className="flex gap-1 p-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+
+            {uploadBusy && (
               <div className="flex justify-start items-end gap-2">
                 <div className="flex h-7 w-7 shrink-0 mb-1 items-center justify-center rounded-xl bg-[#00D084] text-[#0B1F1C] text-xs font-black select-none">
                   M
@@ -784,7 +653,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
 
           <div className={`flex shrink-0 items-center gap-2 border-t px-3 py-3 sm:px-4 ${isDark ? 'border-white/10' : 'border-slate-200'}`}>
             <button
-              onClick={toggleVoice}
+              onClick={startVoice}
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition ${
                 isListening
                   ? 'animate-pulse bg-red-500 text-white'
@@ -804,30 +673,25 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                 ref={inputRef}
                 value={inputText}
                 onChange={(event) => setInputText(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    sendMessage();
-                  }
-                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend(inputText)}
                 placeholder={isListening ? copy.listening : copy.placeholder}
-                disabled={isLoading || uploadBusy}
+                disabled={isTyping || uploadBusy}
                 className={`w-full min-h-10 rounded-xl px-3 py-2 text-sm outline-none transition focus:ring-1 focus:ring-[#00D084] ${
                   isDark
                     ? 'border border-white/10 bg-white/5 text-[#F7FAFC] placeholder:text-white/30'
                     : 'border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400'
                 }`}
               />
-                {(isListening || voiceError) && (
-                  <p className={`mt-1 text-[10px] font-semibold ${voiceError ? 'text-rose-500' : isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
-                    {voiceError || copy.listeningActive}
+                {isListening && (
+                  <p className={`mt-1 text-[10px] font-semibold ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>
+                    {copy.listeningActive}
                   </p>
                 )}
             </div>
 
             <button
-              onClick={() => sendMessage()}
-              disabled={!inputText.trim() || isLoading || uploadBusy}
+              onClick={() => handleSend(inputText)}
+              disabled={!inputText.trim() || isTyping || uploadBusy}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#00D084] text-[#0B1F1C] transition hover:scale-105 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
