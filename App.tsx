@@ -26,7 +26,7 @@ const detectInitialTheme = (): Theme => {
   if (typeof window === 'undefined') return 'light';
   const saved = window.localStorage.getItem('ourpharma-theme');
   if (saved === 'light' || saved === 'dark') return saved;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 };
 
 const detectInitialLanguage = (): Language => {
@@ -460,14 +460,14 @@ const App: React.FC = () => {
 
   if (isSessionLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B1F1C] text-[#F7FAFC]">
-        <p className="text-sm font-black uppercase tracking-[0.3em] text-[#A0AEC0]">Loading Session...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f4fbf5] text-slate-900">
+        <p className="text-sm font-black uppercase tracking-[0.3em] text-emerald-700">Loading Session...</p>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${state.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${state.theme === 'dark' ? 'bg-slate-950 text-slate-50' : 'bg-[#f4fbf5] text-slate-900'}`}>
       <Header 
         onSignInClick={() => setView('login')} 
         user={state.user} 
@@ -496,12 +496,12 @@ const App: React.FC = () => {
       
       <main className="flex-grow">
         <div className="mx-auto mt-6 flex max-w-7xl flex-wrap items-center gap-3 px-4 sm:px-6">
-          <div className={`grid min-h-11 grid-cols-3 rounded-full p-1 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-white shadow-sm'}`}>
+          <div className={`grid min-h-11 grid-cols-3 rounded-full p-1 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-white/95 shadow-[0_16px_34px_-24px_rgba(22,163,74,0.35)]'}`}>
             <button
               onClick={() => setView('landing')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'landing'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-emerald-600 text-white shadow-sm'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -511,7 +511,7 @@ const App: React.FC = () => {
               onClick={() => setView('medicines')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'medicines'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-emerald-600 text-white shadow-sm'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -521,7 +521,7 @@ const App: React.FC = () => {
               onClick={() => setView('experts')}
               className={`min-h-11 min-w-28 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest transition ${
                 state.view === 'experts'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-emerald-600 text-white shadow-sm'
                   : (state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600')
               }`}
             >
@@ -531,14 +531,14 @@ const App: React.FC = () => {
           {session ? (
             <button
               onClick={handleLogout}
-              className="min-h-11 rounded-full border border-blue-600 bg-blue-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white transition duration-200 hover:bg-blue-700"
+              className="min-h-11 rounded-full border border-emerald-600 bg-emerald-600 px-4 py-2 text-xs font-black uppercase tracking-widest text-white transition duration-200 hover:bg-emerald-700"
             >
               {t.logout}
             </button>
           ) : (
             <button
               onClick={() => setView('login')}
-              className="min-h-11 rounded-full border border-blue-600 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-widest text-blue-600 transition duration-200 hover:bg-blue-600 hover:text-white"
+              className="min-h-11 rounded-full border border-emerald-600 bg-transparent px-4 py-2 text-xs font-black uppercase tracking-widest text-emerald-700 transition duration-200 hover:bg-emerald-600 hover:text-white"
             >
               {t.login}
             </button>
@@ -584,19 +584,19 @@ const App: React.FC = () => {
 
         {state.view === 'landing' && (
           <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="relative overflow-hidden pb-40 pt-24">
-            <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.22),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(13,148,136,0.12),_transparent_58%)]'}`}></div>
+            <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.2),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.16),_transparent_58%)]'}`}></div>
             <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
               <div className="pt-10 lg:pt-16">
-                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.32, ease: 'easeOut' }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                  <span className="h-2 w-2 rounded-full bg-blue-600"></span>
+                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.32, ease: 'easeOut' }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
+                  <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
                   {t.delivery}
                 </motion.div>
                 <div className={`mb-6 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white/80 text-slate-600'}`}>
                   Delivering to: {locationLabel}
                 </div>
-                <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 160, damping: 24 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#CBD5E1]' : 'bg-gradient-to-b from-slate-900 to-slate-700'}`}>
+                <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 160, damping: 24 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#CBD5E1]' : 'bg-gradient-to-b from-slate-900 via-slate-800 to-emerald-900'}`}>
                   {t.tagline1} <br />
-                  <span className="text-blue-600">{t.tagline2}</span>
+                  <span className="text-emerald-600">{t.tagline2}</span>
                 </motion.h1>
                 <div className="mb-12 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.22em]">
                   <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Exact Salt Mapping</span>
@@ -620,7 +620,7 @@ const App: React.FC = () => {
                     <h3 className={`text-xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>
                       Featured Medicines
                     </h3>
-                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-[#16a34a]">Top picks</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-600">Top picks</span>
                   </div>
                   <motion.div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" variants={featuredGridVariants}>
                     {featuredMedicines.map((medicine) => (
@@ -643,9 +643,9 @@ const App: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.24 + i * 0.08, type: 'spring', stiffness: 150, damping: 24 }}
                       whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-white/95 shadow-sm'}`}
+                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-white/95 shadow-[0_18px_40px_-30px_rgba(22,163,74,0.32)]'}`}
                     >
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${state.theme === 'dark' ? 'bg-blue-950/40 text-blue-300' : 'bg-blue-50 text-blue-600'}`}>
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${state.theme === 'dark' ? 'bg-emerald-950/40 text-emerald-300' : 'bg-emerald-50 text-emerald-600'}`}>
                         <card.icon className="h-6 w-6" />
                       </div>
                       <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>{card.title}</p>
@@ -656,25 +656,25 @@ const App: React.FC = () => {
               </div>
 
               <div className="relative mt-4 lg:mt-0">
-                <div className={`rounded-2xl p-8 backdrop-blur-xl ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-white/95 shadow-lg shadow-slate-200/60'}`}>
-                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-teal-600">Pharmacy Control Tower</p>
+                <div className={`rounded-2xl p-8 backdrop-blur-xl ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-white/95 shadow-[0_28px_60px_-38px_rgba(22,163,74,0.34)]'}`}>
+                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-emerald-600">Pharmacy Control Tower</p>
                   <h2 className={`text-3xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Generic-first care without losing trust.</h2>
                   <p className={`mt-4 text-sm font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
                     The experience is designed to show the original medicine, the identical salt, the savings, and the fulfillment promise in one clean decision flow.
                   </p>
 
                   <div className="mt-8 space-y-4">
-                    <div className={`rounded-2xl p-5 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-slate-200 bg-slate-50'}`}>
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-teal-600">What the customer sees</p>
+                    <div className={`rounded-2xl p-5 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-emerald-50/70'}`}>
+                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-600">What the customer sees</p>
                       <div className="mt-3 flex items-center justify-between">
                         <div>
                           <p className={`text-lg font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Branded vs Generic</p>
                           <p className={`text-xs font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Original brand, identical molecule, and savings in one place.</p>
                         </div>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200"><ShieldCheck className="h-3 w-3" />Verified</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200"><ShieldCheck className="h-3 w-3" />Verified</span>
                       </div>
                     </div>
-                    <div className="rounded-2xl border border-blue-600 bg-blue-600 p-5 text-white">
+                    <div className="rounded-2xl border border-emerald-600 bg-gradient-to-br from-emerald-500 to-emerald-700 p-5 text-white shadow-[0_20px_50px_-26px_rgba(22,163,74,0.5)]">
                       <p className="text-[10px] font-black uppercase tracking-[0.28em]">Why it works</p>
                       <p className="mt-3 text-sm font-medium leading-relaxed">This positions the product as a one-stop pharmacy: upload, compare, substitute, cart, and checkout without leaving the same flow.</p>
                     </div>
@@ -870,7 +870,7 @@ const App: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      <footer className="border-t border-emerald-100 bg-white/70 py-24 text-slate-500 backdrop-blur dark:border-emerald-950/40 dark:bg-slate-950 dark:text-slate-400">
+      <footer className="border-t border-emerald-100 bg-white/80 py-24 text-slate-500 backdrop-blur dark:border-emerald-950/40 dark:bg-slate-950 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
             <div className="lg:col-span-1">

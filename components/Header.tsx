@@ -52,31 +52,31 @@ const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors duration-300 ${theme === 'dark' ? 'border-white/10 bg-[#0B1F1C]/95' : 'border-slate-200 bg-white/95'}`}>
+    <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-colors duration-300 ${theme === 'dark' ? 'border-white/10 bg-[#0B1F1C]/95' : 'border-emerald-100 bg-white/92 shadow-[0_16px_40px_-34px_rgba(22,163,74,0.4)]'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={onLogoClick}>
             <motion.div
-              className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00D084]"
+              className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-[0_14px_30px_-18px_rgba(22,163,74,0.65)]"
               whileHover={{ scale: 1.1, rotate: 3 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="mb-1 text-2xl font-black text-[#0B1F1C]">G</span>
-              <div className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-[#F7FAFC] ring-2 ring-[#0B1F1C]">
-                <svg className="h-4 w-4 text-[#00D084]" viewBox="0 0 24 24" fill="currentColor">
+              <span className="mb-1 text-2xl font-black text-white">G</span>
+              <div className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center overflow-hidden rounded-full bg-[#F7FAFC] ring-2 ring-emerald-700">
+                <svg className="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8.15,20C11.33,20 14.25,18.23 15.82,15.5L13.12,13.03C15.84,11.4 17,8 17,8M8,18C5,18 2,15 2,12C2,7 5,3 12,2C11,5 11,8 8,11C5,14 5,18 8,18Z" />
                 </svg>
               </div>
             </motion.div>
             <div className="flex flex-col">
-              <span className={`text-2xl font-black leading-none tracking-tighter ${theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Our<span className="text-[#00D084]">Pharma</span></span>
-              <span className={`mt-1 text-[10px] font-bold uppercase tracking-[0.28em] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>One Stop Generic Pharmacy</span>
+              <span className={`text-2xl font-black leading-none tracking-tighter ${theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Our<span className="text-emerald-600">Pharma</span></span>
+              <span className={`mt-1 text-[10px] font-bold uppercase tracking-[0.28em] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-emerald-700/80'}`}>One Stop Generic Pharmacy</span>
             </div>
           </div>
           
           <div className="hidden xl:flex items-center gap-4">
-            <div className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 backdrop-blur-lg ${theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-slate-200 bg-slate-50'}`}>
-              <svg className="h-4 w-4 text-[#00D084]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+            <div className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 backdrop-blur-lg ${theme === 'dark' ? 'border border-white/10 bg-white/5' : 'border border-emerald-100 bg-emerald-50/70'}`}>
+              <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
               <span className={`text-xs font-bold ${theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-700'}`}>Deliver To</span>
               <input
                 type="text"
@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({
               />
               <button
                 onClick={onDetectLocation}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#00D084] transition duration-200 hover:scale-105 hover:bg-[#00D084]/10"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-emerald-600 transition duration-200 hover:scale-105 hover:bg-emerald-100"
                 title={isDetectingLocation ? 'Locating...' : 'Detect location'}
               >
                 {isDetectingLocation ? (
@@ -104,23 +104,23 @@ const Header: React.FC<HeaderProps> = ({
             <div className="relative" ref={menuRef}>
               <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`min-h-11 flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors hover:text-[#00D084] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}
+                className={`min-h-11 flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors hover:text-emerald-600 ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}
               >
                 Company
                 <svg className={`w-3 h-3 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
               </button>
               
               {isMenuOpen && (
-                <div className={`absolute top-full left-0 mt-2 w-52 rounded-2xl py-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 ${theme === 'dark' ? 'border border-white/10 bg-[#0B1F1C]' : 'border border-slate-200 bg-white'}`}>
+                <div className={`absolute top-full left-0 mt-2 w-52 rounded-2xl py-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 ${theme === 'dark' ? 'border border-white/10 bg-[#0B1F1C]' : 'border border-emerald-100 bg-white'}`}>
                   <button 
                     onClick={() => { onViewChange('about'); setIsMenuOpen(false); }}
-                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-[#00D084]/10 hover:text-[#00D084] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
+                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
                   >
                     About Us
                   </button>
                   <button 
                     onClick={() => { onViewChange('founders'); setIsMenuOpen(false); }}
-                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-[#00D084]/10 hover:text-[#00D084] ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
+                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
                   >
                     Meet the Founders
                   </button>
@@ -133,7 +133,7 @@ const Header: React.FC<HeaderProps> = ({
             <select 
               value={language}
               onChange={(e) => onLanguageChange(e.target.value as Language)}
-              className={`min-h-11 cursor-pointer appearance-none rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none ${theme === 'dark' ? 'border border-white/10 bg-[#0f2c27] text-[#F7FAFC]' : 'border border-slate-200 bg-white text-slate-700'}`}
+              className={`min-h-11 cursor-pointer appearance-none rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest outline-none ${theme === 'dark' ? 'border border-white/10 bg-[#0f2c27] text-[#F7FAFC]' : 'border border-emerald-100 bg-white text-slate-700'}`}
               style={{ colorScheme: theme }}
               title="English + Top 5 Indian languages"
             >
@@ -147,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({
 
             <button 
               onClick={onThemeToggle}
-              className={`min-h-11 rounded-xl p-3 transition duration-200 hover:scale-105 hover:border-[#00D084] hover:text-[#00D084] ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-slate-200 bg-white text-slate-500'}`}
+              className={`min-h-11 rounded-xl p-3 transition duration-200 hover:scale-105 hover:border-emerald-500 hover:text-emerald-600 ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-500'}`}
               title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
             >
               {theme === 'light' ? (
@@ -159,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({
 
             <motion.button 
               onClick={onCartClick}
-              className={`relative min-h-11 rounded-xl p-3 transition duration-200 hover:border-[#00D084] hover:text-[#00D084] ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-slate-200 bg-white text-slate-500'}`}
+              className={`relative min-h-11 rounded-xl p-3 transition duration-200 hover:border-emerald-500 hover:text-emerald-600 ${theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-500'}`}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.92 }}
             >
@@ -169,7 +169,7 @@ const Header: React.FC<HeaderProps> = ({
               {cartCount > 0 && (
                 <motion.span
                   key={cartCount}
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#48BB78] text-[10px] font-black text-[#0B1F1C]"
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-black text-white"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 18 }}
@@ -182,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({
             {user ? (
               <button
                 onClick={() => onViewChange('profile')}
-                className="flex items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-[#00D084]/10"
+                className="flex items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-emerald-50"
                 title="Edit Profile"
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-full border font-bold ${theme === 'dark' ? 'border-white/10 bg-white/5 text-[#F7FAFC]' : 'border-emerald-100 bg-emerald-50 text-emerald-700'}`}>
@@ -196,7 +196,7 @@ const Header: React.FC<HeaderProps> = ({
             ) : (
               <motion.button 
                 onClick={onSignInClick}
-                className="min-h-11 rounded-full border border-[#00D084] bg-[#00D084] px-6 py-2.5 text-sm font-bold text-[#0B1F1C] transition duration-200 hover:bg-transparent hover:text-[#00D084]"
+                className="min-h-11 rounded-full border border-emerald-600 bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white transition duration-200 hover:bg-white hover:text-emerald-700"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

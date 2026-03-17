@@ -83,22 +83,22 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
 
   return (
     <section className="mx-auto w-full max-w-7xl px-6 pb-24 pt-10">
-      <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-teal-600" />
+          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
           <p>
             Generic alternatives use the same active ingredients and are clinically reviewed before fulfillment. Consult your doctor before switching ongoing therapies.
           </p>
         </div>
         <button
           onClick={() => onBookMedicalConsultation('General medical consultation before switching medicines')}
-          className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
+          className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
         >
           Schedule Dr. Dhingra
         </button>
       </div>
 
-      <div className={`rounded-3xl p-6 ${isDark ? 'border border-slate-700 bg-slate-900' : 'border border-slate-200 bg-white shadow-sm'}`}>
+      <div className={`rounded-3xl p-6 ${isDark ? 'border border-slate-700 bg-slate-900' : 'border border-emerald-100 bg-white shadow-[0_18px_44px_-34px_rgba(22,163,74,0.28)]'}`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className={`text-2xl font-black tracking-tight ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>{copy.title}</h2>
@@ -106,12 +106,12 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
               {copy.subtitle}
             </p>
           </div>
-          <label className={`inline-flex min-h-11 cursor-pointer items-center gap-3 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest ${isDark ? 'border border-slate-700 bg-slate-800 text-slate-300' : 'border border-slate-200 bg-slate-50 text-slate-600'}`}>
+          <label className={`inline-flex min-h-11 cursor-pointer items-center gap-3 rounded-full px-4 py-2 text-xs font-black uppercase tracking-widest ${isDark ? 'border border-slate-700 bg-slate-800 text-slate-300' : 'border border-emerald-100 bg-emerald-50 text-slate-600'}`}>
             <input
               type="checkbox"
               checked={chronicOnly}
               onChange={(event) => setChronicOnly(event.target.checked)}
-              className="h-4 w-4 accent-blue-600"
+              className="h-4 w-4 accent-emerald-600"
             />
             {copy.chronicOnly}
           </label>
@@ -123,7 +123,7 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={copy.searchPlaceholder}
-            className={`min-h-11 w-full rounded-2xl py-3 pl-11 pr-4 text-sm font-medium outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100 ${isDark ? 'border border-slate-700 bg-slate-950 text-slate-50 placeholder:text-slate-500' : 'border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400'}`}
+            className={`min-h-11 w-full rounded-2xl py-3 pl-11 pr-4 text-sm font-medium outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 ${isDark ? 'border border-slate-700 bg-slate-950 text-slate-50 placeholder:text-slate-500' : 'border border-emerald-100 bg-white text-slate-900 placeholder:text-slate-400'}`}
           />
         </div>
 
@@ -133,7 +133,7 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
       </div>
 
       {filteredResults.length === 0 ? (
-        <div className={`mt-10 rounded-3xl p-12 text-center ${isDark ? 'border border-slate-700 bg-slate-900' : 'border border-slate-200 bg-white shadow-sm'}`}>
+        <div className={`mt-10 rounded-3xl p-12 text-center ${isDark ? 'border border-slate-700 bg-slate-900' : 'border border-emerald-100 bg-white shadow-[0_18px_44px_-34px_rgba(22,163,74,0.28)]'}`}>
           <p className={`text-lg font-bold ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>{copy.noFoundTitle}</p>
           <p className={`mt-2 text-sm leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{copy.noFoundDesc}</p>
         </div>
@@ -149,7 +149,7 @@ const MedicineSearch: React.FC<MedicineSearchProps> = ({ onAddToCart, onBookMedi
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => setVisibleCount((previous) => previous + PAGE_SIZE)}
-            className="min-h-11 rounded-xl border border-blue-600 bg-blue-600 px-6 py-3 text-sm font-black uppercase tracking-wide text-white transition duration-200 hover:bg-blue-700"
+            className="min-h-11 rounded-xl border border-emerald-600 bg-emerald-600 px-6 py-3 text-sm font-black uppercase tracking-wide text-white transition duration-200 hover:bg-emerald-700"
           >
             {copy.loadMore}
           </button>

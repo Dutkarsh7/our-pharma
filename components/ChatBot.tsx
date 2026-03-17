@@ -306,7 +306,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
 
   const shellClass = isDark
     ? 'border border-slate-800 bg-slate-950 text-slate-50'
-    : 'border border-slate-200 bg-white text-slate-900';
+    : 'border border-emerald-100 bg-white text-slate-900 shadow-[0_28px_60px_-38px_rgba(22,163,74,0.34)]';
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 flex flex-col items-stretch gap-3 sm:bottom-6 sm:left-auto sm:right-6 sm:items-end">
@@ -319,14 +319,14 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
             transition={{ type: 'spring', stiffness: 220, damping: 28 }}
             className={`flex h-[78dvh] max-h-[700px] w-full max-w-full flex-col overflow-hidden rounded-[28px] shadow-2xl sm:h-[620px] sm:w-[420px] ${shellClass}`}
           >
-            <div className="border-b border-slate-200 bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 px-4 py-4 text-white dark:border-slate-800">
+            <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-600 via-emerald-700 to-green-800 px-4 py-4 text-white dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                  <ShieldCheck className="h-5 w-5 text-teal-300" />
+                  <ShieldCheck className="h-5 w-5 text-emerald-100" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-black tracking-tight">{localeCopy.title}</p>
-                  <p className="text-xs text-slate-300">{localeCopy.subtitle}</p>
+                  <p className="text-xs text-emerald-100/90">{localeCopy.subtitle}</p>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="rounded-xl bg-white/10 p-2 text-slate-200 transition hover:bg-white/15">
                   <X className="h-4 w-4" />
@@ -334,7 +334,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-slate-950">
+            <div className="flex-1 overflow-y-auto bg-[#f7fcf8] px-4 py-4 dark:bg-slate-950">
               <div className="mb-4 flex flex-wrap gap-2">
                 {localeCopy.quick.map((label) => (
                   <button
@@ -346,7 +346,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                       }
                       void generateReply(label);
                     }}
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-teal-200 hover:text-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                    className="rounded-full border border-emerald-100 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                   >
                     {label}
                   </button>
@@ -356,21 +356,21 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
               <div className="space-y-3">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-sm bg-blue-600 text-white' : message.role === 'system' ? 'border border-teal-200 bg-teal-50 text-teal-800' : 'rounded-bl-sm border border-slate-200 bg-white text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200'}`}>
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-sm bg-emerald-600 text-white' : message.role === 'system' ? 'border border-emerald-200 bg-emerald-50 text-emerald-800' : 'rounded-bl-sm border border-emerald-100 bg-white text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200'}`}>
                       {message.imagePreview && (
                         <img src={message.imagePreview} alt="Prescription preview" className="mb-3 max-h-32 w-full rounded-xl object-cover" />
                       )}
                       <p className="whitespace-pre-line">{message.content}</p>
-                      <p className={`mt-2 text-right text-[10px] ${message.role === 'user' ? 'text-blue-100' : 'text-slate-400'}`}>{message.time}</p>
+                      <p className={`mt-2 text-right text-[10px] ${message.role === 'user' ? 'text-emerald-100' : 'text-slate-400'}`}>{message.time}</p>
                     </div>
                   </div>
                 ))}
 
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    <div className="flex items-center gap-1 rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                       {[0, 1, 2].map((index) => (
-                        <span key={index} className="h-2 w-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: `${index * 120}ms` }} />
+                        <span key={index} className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: `${index * 120}ms` }} />
                       ))}
                     </div>
                   </div>
@@ -380,12 +380,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
               </div>
             </div>
 
-            <div className="border-t border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950">
+            <div className="border-t border-emerald-100 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950">
               {voiceError && <p className="mb-2 text-xs font-medium text-rose-500">{voiceError}</p>}
               <div className="flex items-end gap-2">
                 <button
                   onClick={startVoice}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition ${isListening ? 'border-teal-400 bg-teal-500 text-white shadow-[0_0_0_8px_rgba(20,184,166,0.15)] animate-pulse' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-teal-300 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition ${isListening ? 'border-emerald-400 bg-emerald-500 text-white shadow-[0_0_0_8px_rgba(34,197,94,0.15)] animate-pulse' : 'border-emerald-100 bg-emerald-50 text-slate-600 hover:border-emerald-300 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`}
                   title={localeCopy.listening}
                 >
                   <Mic className="h-5 w-5" />
@@ -393,7 +393,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
 
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-teal-300 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-slate-600 transition hover:border-emerald-300 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                   title="Upload prescription"
                 >
                   <Camera className="h-5 w-5" />
@@ -412,7 +412,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                   }}
                 />
 
-                <div className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
+                <div className="flex-1 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
                   <textarea
                     value={inputText}
                     onChange={(event) => setInputText(event.target.value)}
@@ -432,7 +432,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
                 <button
                   onClick={() => void generateReply(inputText)}
                   disabled={!inputText.trim() || uploadBusy}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-5 w-5" />
                 </button>
@@ -452,7 +452,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
           setIsOpen((value) => !value);
           setHasUnread(false);
         }}
-        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_20px_45px_-20px_rgba(37,99,235,0.65)] transition hover:bg-blue-700"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_20px_45px_-20px_rgba(22,163,74,0.55)] transition hover:bg-emerald-700"
         aria-label="Open chat assistant"
       >
         <ShieldCheck className="h-6 w-6" />
