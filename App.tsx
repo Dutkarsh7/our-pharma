@@ -1,12 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, ShieldCheck, Truck, Upload } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { AppState, ViewState, User, Medicine as PrescriptionMedicine, CartItem, Language, Theme } from './types';
 import { analyzePrescription } from './services/geminiService';
 import Header from './components/Header';
-import FileUploader from './components/FileUploader';
 import AnalysisResult from './components/AnalysisResult';
 import AdminDashboard from './components/AdminDashboard';
 import Auth from './components/Auth';
@@ -14,7 +12,7 @@ import Checkout from './components/Checkout';
 import ProfileEditor from './components/ProfileEditor';
 import ExpertConsult from './components/ExpertConsult';
 import ConsultationBooking from './components/ConsultationBooking';
-import MedicineCard from './components/MedicineCard';
+import PremiumLanding from './components/PremiumLanding';
 import MedicineSearch from './src/components/MedicineSearch';
 import ChatBot from './components/ChatBot.tsx';
 import { medicines, Medicine as CatalogMedicine } from './src/data/medicines';
@@ -175,19 +173,6 @@ const FEATURED_MEDICINE_NAMES = [
   'Human Mixtard 70/30',
   'Telma 40',
 ];
-
-const featuredGridVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.08 }
-  },
-};
-
-const featuredCardVariants = {
-  hidden: { opacity: 0, y: 26 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.36, ease: 'easeOut' } },
-};
 
 const FounderAvatar: React.FC<{ name: string; image?: string; className?: string }> = ({ name, image, className = '' }) => {
   const [hasImageError, setHasImageError] = useState(false);
@@ -583,115 +568,18 @@ const App: React.FC = () => {
         )}
 
         {state.view === 'landing' && (
-          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="relative overflow-hidden pb-40 pt-24">
-            <div className={`absolute inset-x-0 top-0 -z-10 h-[640px] ${state.theme === 'dark' ? 'bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.2),_transparent_52%)]' : 'bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.16),_transparent_58%)]'}`}></div>
-            <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-              <div className="pt-10 lg:pt-16">
-                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.32, ease: 'easeOut' }} className="mb-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-6 py-2 text-[10px] font-black uppercase tracking-[0.4em] text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
-                  <span className="h-2 w-2 rounded-full bg-emerald-600"></span>
-                  {t.delivery}
-                </motion.div>
-                <div className={`mb-6 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-lg ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white/80 text-slate-600'}`}>
-                  Delivering to: {locationLabel}
-                </div>
-                <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, type: 'spring', stiffness: 160, damping: 24 }} className={`mb-8 bg-clip-text text-6xl font-black leading-[0.9] tracking-tighter text-transparent md:text-8xl ${state.theme === 'dark' ? 'bg-gradient-to-b from-[#FFFFFF] to-[#CBD5E1]' : 'bg-gradient-to-b from-slate-900 via-slate-800 to-emerald-900'}`}>
-                  {t.tagline1} <br />
-                  <span className="text-emerald-600">{t.tagline2}</span>
-                </motion.h1>
-                <div className="mb-12 flex flex-wrap gap-3 text-[11px] font-black uppercase tracking-[0.22em]">
-                  <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Exact Salt Mapping</span>
-                  <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>Generic Price Discovery</span>
-                  <span className={`rounded-full px-4 py-2 ${state.theme === 'dark' ? 'border border-white/10 bg-white/5 text-[#A0AEC0]' : 'border border-emerald-100 bg-white text-slate-600'}`}>2 Hour Pharmacy Delivery</span>
-                </div>
-                <p className={`mb-8 max-w-2xl text-sm font-semibold leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
-                  {t.description}
-                </p>
-                <p className={`mb-8 max-w-2xl text-sm font-semibold leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
-                  {t.serviceability}
-                </p>
-
-                <motion.div
-                  variants={featuredGridVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="mb-10"
-                >
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className={`text-xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>
-                      Featured Medicines
-                    </h3>
-                    <span className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-600">Top picks</span>
-                  </div>
-                  <motion.div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" variants={featuredGridVariants}>
-                    {featuredMedicines.map((medicine) => (
-                      <motion.div key={medicine.id} variants={featuredCardVariants}>
-                        <MedicineCard medicine={medicine} onAddCatalogToCart={handleAddCatalogToCart} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </motion.div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {[
-                    { icon: Upload, title: 'Upload Prescription', desc: 'Drop your prescription and start comparison instantly.' },
-                    { icon: RefreshCw, title: 'Save on Identical Salts', desc: 'Switch from branded to identical generic molecules safely.' },
-                    { icon: Truck, title: '2-Hour Doorstep Fulfillment', desc: 'Hyperlocal delivery pipeline for faster medicine access.' },
-                  ].map((card, i) => (
-                    <motion.div
-                      key={card.title}
-                      initial={{ opacity: 0, y: 28 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.24 + i * 0.08, type: 'spring', stiffness: 150, damping: 24 }}
-                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                      className={`rounded-2xl p-6 backdrop-blur-lg cursor-default ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-white/95 shadow-[0_18px_40px_-30px_rgba(22,163,74,0.32)]'}`}
-                    >
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${state.theme === 'dark' ? 'bg-emerald-950/40 text-emerald-300' : 'bg-emerald-50 text-emerald-600'}`}>
-                        <card.icon className="h-6 w-6" />
-                      </div>
-                      <p className={`mt-3 text-base font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>{card.title}</p>
-                      <p className={`mt-2 text-sm leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>{card.desc}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative mt-4 lg:mt-0">
-                <div className={`rounded-2xl p-8 backdrop-blur-xl ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-white/95 shadow-[0_28px_60px_-38px_rgba(22,163,74,0.34)]'}`}>
-                  <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-emerald-600">Pharmacy Control Tower</p>
-                  <h2 className={`text-3xl font-black tracking-tight ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Generic-first care without losing trust.</h2>
-                  <p className={`mt-4 text-sm font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>
-                    The experience is designed to show the original medicine, the identical salt, the savings, and the fulfillment promise in one clean decision flow.
-                  </p>
-
-                  <div className="mt-8 space-y-4">
-                    <div className={`rounded-2xl p-5 backdrop-blur-lg ${state.theme === 'dark' ? 'border border-slate-800 bg-slate-900/80' : 'border border-emerald-100 bg-emerald-50/70'}`}>
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-600">What the customer sees</p>
-                      <div className="mt-3 flex items-center justify-between">
-                        <div>
-                          <p className={`text-lg font-black ${state.theme === 'dark' ? 'text-[#F7FAFC]' : 'text-slate-900'}`}>Branded vs Generic</p>
-                          <p className={`text-xs font-medium leading-relaxed ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}>Original brand, identical molecule, and savings in one place.</p>
-                        </div>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200"><ShieldCheck className="h-3 w-3" />Verified</span>
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-emerald-600 bg-gradient-to-br from-emerald-500 to-emerald-700 p-5 text-white shadow-[0_20px_50px_-26px_rgba(22,163,74,0.5)]">
-                      <p className="text-[10px] font-black uppercase tracking-[0.28em]">Why it works</p>
-                      <p className="mt-3 text-sm font-medium leading-relaxed">This positions the product as a one-stop pharmacy: upload, compare, substitute, cart, and checkout without leaving the same flow.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="relative z-10 mt-6">
-              <FileUploader onUpload={handleUpload} isAnalyzing={state.isAnalyzing} language={state.language} />
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.7 }} className="mx-auto mt-24 flex max-w-5xl flex-wrap justify-center gap-12">
-              <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.scans}</span>
-              <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.gmp}</span>
-              <span className={`text-[10px] font-black uppercase tracking-[0.3em] ${state.theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>{t.pharma}</span>
-            </motion.div>
+          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
+            <PremiumLanding
+              language={state.language}
+              locationLabel={locationLabel}
+              featuredMedicines={featuredMedicines}
+              founders={founders}
+              onUpload={handleUpload}
+              onBrowseMedicines={() => setView('medicines')}
+              onTalkToExpert={() => setView('experts')}
+              onAddCatalogToCart={handleAddCatalogToCart}
+              isAnalyzing={state.isAnalyzing}
+            />
           </motion.div>
         )}
 
