@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { loadCashfreeScript, CASHFREE_APP_ID } from '../services/cashfree';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartItem } from '../types';
 import type { Theme } from '../types';
@@ -135,46 +136,56 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
   };
 
   // Save order to localStorage and transition to success
-  // Cashfree payment handler (test/demo only)
+
+  // Cashfree payment handler (real backend integration)
   const handleCashfreePay = async () => {
     if (isBlocked) return;
     setPaymentState('processing');
     await loadCashfreeScript();
-    // For demo: create a dummy order token (in production, get from backend)
     const orderId = uid();
     const orderAmount = total;
     const customerName = address.name || 'Demo User';
     const customerPhone = address.phone || '9999999999';
     const customerEmail = `${customerName.replace(/\s/g, '').toLowerCase()}@ourpharma.in`;
-    // Cashfree Drop-in config (test mode)
-    // See: https://docs.cashfree.com/docs/payment-gateway/web-integration/drop-in
-    const cashfree = window.Cashfree;
-    if (!cashfree) {
-      alert('Cashfree SDK failed to load.');
+    try {
+      // Call backend to get real payment session token
+      const res = await axios.post('http://localhost:5001/create-order', {
+        orderId,
+        orderAmount,
+        customerName,
+        customerPhone,
+        customerEmail
+      });
+      const orderToken = res.data.paymentSessionId;
+      const cashfree = window.Cashfree;
+      if (!cashfree) {
+        alert('Cashfree SDK failed to load.');
+        setPaymentState('idle');
+        return;
+      }
+      cashfree.init({
+        mode: 'sandbox',
+        paymentSessionId: orderToken,
+        redirectTarget: '_self',
+        onSuccess: function(data) {
+          setPaymentState('done');
+          setShowSuccess(true);
+          onClearCart();
+        },
+        onFailure: function(data) {
+          setPaymentState('idle');
+          alert('Payment failed.');
+        },
+        onPending: function(data) {
+          setPaymentState('idle');
+          alert('Payment pending.');
+        },
+      });
+      cashfree.open();
+    } catch (err) {
       setPaymentState('idle');
-      return;
+      alert('Failed to initiate payment. Please try again.');
     }
-    // For test mode, use a dummy token (in prod, get from backend)
-    const orderToken = 'dummy_token_for_demo';
-    cashfree.init({
-      mode: 'sandbox',
-      paymentSessionId: orderToken,
-      redirectTarget: '_self',
-      onSuccess: function(data) {
-        setPaymentState('done');
-        setShowSuccess(true);
-        onClearCart();
-      },
-      onFailure: function(data) {
-        setPaymentState('idle');
-        alert('Payment failed.');
-      },
-      onPending: function(data) {
-        setPaymentState('idle');
-        alert('Payment pending.');
-      },
-    });
-    cashfree.open();
   };
 
   const handlePayNow = () => {
