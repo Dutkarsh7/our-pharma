@@ -289,25 +289,6 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     recognitionRef.current?.stop();
     setIsRecording(false);
   };
-      const transcript = event.results[0]?.[0]?.transcript?.trim() ?? '';
-      setInputText(transcript);
-      if (transcript) {
-        void generateReply(transcript);
-      }
-    };
-    recognition.onerror = () => {
-      setVoiceError(localeCopy.noSpeech);
-      setIsListening(false);
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    setVoiceError('');
-    setIsListening(true);
-    recognition.start();
-  };
 
   const handleImageFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -327,43 +308,32 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
         pushMessage({ role: 'assistant', type: 'text', content: `Prescription notes extracted:\n${extracted}` });
       } catch {
         pushMessage({ role: 'assistant', type: 'text', content: localeCopy.imageError });
-      return (
-        <div>
-          {/* ...existing chat UI... */}
-          <div className="chatbot-input-row">
-            {/* ...existing input... */}
-            {/* Microphone button for voice input (Web Speech API) */}
-            <button
-              type="button"
-              aria-label="Start voice input"
-              onClick={isRecording ? stopVoice : startVoice}
-              className={`ml-2 p-2 rounded-full transition ${
-                isRecording ? 'bg-red-500 animate-pulse text-white' : 'bg-white text-green-700'
-              }`}
-            >
-              <Mic />
-            </button>
-            <button
-              type="button"
-              aria-label="Send"
-              onClick={() => generateReply(inputText)}
-              className="ml-2 p-2 rounded-full bg-green-600 text-white"
-            >
-              <Send />
-            </button>
-          </div>
-          {voiceError && (
-            <div className="text-xs text-red-500 mt-1">{voiceError}</div>
-          )}
-          {/* ...existing chat UI... */}
-        </div>
-      );
-                  <p className="text-xs text-emerald-100/90">{localeCopy.subtitle}</p>
-                </div>
-                <button onClick={() => setIsOpen(false)} className="rounded-xl bg-white/10 p-2 text-slate-200 transition hover:bg-white/15">
-                  <X className="h-4 w-4" />
-                </button>
+      } finally {
+        setUploadBusy(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex items-end gap-3">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="flex h-[560px] w-[380px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_25px_90px_-20px_rgba(22,163,74,0.3)] dark:bg-slate-900"
+          >
+            <div className="flex items-center justify-between bg-gradient-to-r from-emerald-600 to-emerald-500 px-5 py-4 text-white shadow-md">
+              <div>
+                <h3 className="text-sm font-bold">{localeCopy.title}</h3>
+                <p className="text-xs text-emerald-100/90">{localeCopy.subtitle}</p>
               </div>
+              <button onClick={() => setIsOpen(false)} className="rounded-xl bg-white/10 p-2 text-slate-200 transition hover:bg-white/15">
+                <X className="h-4 w-4" />
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto bg-[#f7fcf8] px-4 py-4 dark:bg-slate-950">
