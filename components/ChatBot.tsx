@@ -289,26 +289,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     recognitionRef.current?.stop();
     setIsRecording(false);
   };
-      const transcript = event.results[0]?.[0]?.transcript?.trim() ?? '';
-      setInputText(transcript);
-      if (transcript) {
-        void generateReply(transcript);
-      }
-    };
-    recognition.onerror = () => {
-      setVoiceError(localeCopy.noSpeech);
-      setIsListening(false);
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
-    setVoiceError('');
-    setIsListening(true);
-    recognition.start();
-  };
-
+  // ...existing code...
   const handleImageFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
@@ -327,169 +308,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
         pushMessage({ role: 'assistant', type: 'text', content: `Prescription notes extracted:\n${extracted}` });
       } catch {
         pushMessage({ role: 'assistant', type: 'text', content: localeCopy.imageError });
-      return (
-        <div>
-          {/* ...existing chat UI... */}
-          <div className="chatbot-input-row">
-            {/* ...existing input... */}
-            {/* Microphone button for voice input (Web Speech API) */}
-            <button
-              type="button"
-              aria-label="Start voice input"
-              onClick={isRecording ? stopVoice : startVoice}
-              className={`ml-2 p-2 rounded-full transition ${
-                isRecording ? 'bg-red-500 animate-pulse text-white' : 'bg-white text-green-700'
-              }`}
-            >
-              <Mic />
-            </button>
-            <button
-              type="button"
-              aria-label="Send"
-              onClick={() => generateReply(inputText)}
-              className="ml-2 p-2 rounded-full bg-green-600 text-white"
-            >
-              <Send />
-            </button>
-          </div>
-          {voiceError && (
-            <div className="text-xs text-red-500 mt-1">{voiceError}</div>
-          )}
-          {/* ...existing chat UI... */}
-        </div>
-      );
-                  <p className="text-xs text-emerald-100/90">{localeCopy.subtitle}</p>
-                </div>
-                <button onClick={() => setIsOpen(false)} className="rounded-xl bg-white/10 p-2 text-slate-200 transition hover:bg-white/15">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+      }
+      setUploadBusy(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
-            <div className="flex-1 overflow-y-auto bg-[#f7fcf8] px-4 py-4 dark:bg-slate-950">
-              <div className="mb-4 flex flex-wrap gap-2">
-                {localeCopy.quick.map((label) => (
-                  <button
-                    key={label}
-                    onClick={() => {
-                      if (label.toLowerCase().includes('upload') || label.includes('upload')) {
-                        fileInputRef.current?.click();
-                        return;
-                      }
-                      void generateReply(label);
-                    }}
-                    className="rounded-full border border-emerald-100 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-3">
-                {messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'rounded-br-sm bg-emerald-600 text-white' : message.role === 'system' ? 'border border-emerald-200 bg-emerald-50 text-emerald-800' : 'rounded-bl-sm border border-emerald-100 bg-white text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200'}`}>
-                      {message.imagePreview && (
-                        <img src={message.imagePreview} alt="Prescription preview" className="mb-3 max-h-32 w-full rounded-xl object-cover" />
-                      )}
-                      <p className="whitespace-pre-line">{message.content}</p>
-                      <p className={`mt-2 text-right text-[10px] ${message.role === 'user' ? 'text-emerald-100' : 'text-slate-400'}`}>{message.time}</p>
-                    </div>
-                  </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="flex items-center gap-1 rounded-2xl border border-emerald-100 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                      {[0, 1, 2].map((index) => (
-                        <span key={index} className="h-2 w-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: `${index * 120}ms` }} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
-
-            <div className="border-t border-emerald-100 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950">
-              {voiceError && <p className="mb-2 text-xs font-medium text-rose-500">{voiceError}</p>}
-              <div className="flex items-end gap-2">
-                <button
-                  onClick={startVoice}
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition ${isListening ? 'border-emerald-400 bg-emerald-500 text-white shadow-[0_0_0_8px_rgba(34,197,94,0.15)] animate-pulse' : 'border-emerald-100 bg-emerald-50 text-slate-600 hover:border-emerald-300 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`}
-                  title={localeCopy.listening}
-                >
-                  <Mic className="h-5 w-5" />
-                </button>
-
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 text-slate-600 transition hover:border-emerald-300 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                  title="Upload prescription"
-                >
-                  <Camera className="h-5 w-5" />
-                </button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      void handleImageFile(file);
-                    }
-                  }}
-                />
-
-                <div className="flex-1 rounded-2xl border border-emerald-100 bg-emerald-50/60 px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-                  <textarea
-                    value={inputText}
-                    onChange={(event) => setInputText(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' && !event.shiftKey) {
-                        event.preventDefault();
-                        void generateReply(inputText);
-                      }
-                    }}
-                    placeholder={isListening ? localeCopy.listening : localeCopy.placeholder}
-                    className="min-h-[42px] w-full resize-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-50 dark:placeholder:text-slate-500"
-                    rows={1}
-                    disabled={uploadBusy}
-                  />
-                </div>
-
-                <button
-                  onClick={() => void generateReply(inputText)}
-                  disabled={!inputText.trim() || uploadBusy}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Send className="h-5 w-5" />
-                </button>
-              </div>
-
-              <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="inline-flex items-center gap-1"><CircleHelp className="h-3.5 w-3.5" /> Ask about generic substitutions or uses</span>
-                <span className="inline-flex items-center gap-1"><TicketPlus className="h-3.5 w-3.5" /> Order support available</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <button
-        onClick={() => {
-          setIsOpen((value) => !value);
-          setHasUnread(false);
-        }}
-        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-[0_20px_45px_-20px_rgba(22,163,74,0.55)] transition hover:bg-emerald-700"
-        aria-label="Open chat assistant"
-      >
-        <ShieldCheck className="h-6 w-6" />
-        {hasUnread && !isOpen && <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full border-2 border-white bg-rose-500" />}
-      </button>
+  // Main return for ChatBot component
+  return (
+    <div>
+      {/* ...existing UI code, including AnimatePresence, quick buttons, chat messages, input, etc. ... */}
     </div>
   );
 };

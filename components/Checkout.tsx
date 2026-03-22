@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { loadCashfreeScript, CASHFREE_APP_ID } from '../services/cashfree';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CartItem } from '../types';
 import type { Theme } from '../types';
@@ -134,6 +135,48 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
   };
 
   // Save order to localStorage and transition to success
+  // Cashfree payment handler (test/demo only)
+  const handleCashfreePay = async () => {
+    if (isBlocked) return;
+    setPaymentState('processing');
+    await loadCashfreeScript();
+    // For demo: create a dummy order token (in production, get from backend)
+    const orderId = uid();
+    const orderAmount = total;
+    const customerName = address.name || 'Demo User';
+    const customerPhone = address.phone || '9999999999';
+    const customerEmail = `${customerName.replace(/\s/g, '').toLowerCase()}@ourpharma.in`;
+    // Cashfree Drop-in config (test mode)
+    // See: https://docs.cashfree.com/docs/payment-gateway/web-integration/drop-in
+    const cashfree = window.Cashfree;
+    if (!cashfree) {
+      alert('Cashfree SDK failed to load.');
+      setPaymentState('idle');
+      return;
+    }
+    // For test mode, use a dummy token (in prod, get from backend)
+    const orderToken = 'dummy_token_for_demo';
+    cashfree.init({
+      mode: 'sandbox',
+      paymentSessionId: orderToken,
+      redirectTarget: '_self',
+      onSuccess: function(data) {
+        setPaymentState('done');
+        setShowSuccess(true);
+        onClearCart();
+      },
+      onFailure: function(data) {
+        setPaymentState('idle');
+        alert('Payment failed.');
+      },
+      onPending: function(data) {
+        setPaymentState('idle');
+        alert('Payment pending.');
+      },
+    });
+    cashfree.open();
+  };
+
   const handlePayNow = () => {
     if (isBlocked) return;
 
@@ -429,6 +472,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
                 className={`rounded-2xl p-8 space-y-4 ${isDark ? 'border border-white/10 bg-white/5 backdrop-blur-lg' : 'border border-slate-200 bg-white shadow-sm'}`}
               >
                 <p className={`text-[10px] font-black uppercase tracking-widest mb-4 ${isDark ? 'text-[#A0AEC0]' : 'text-slate-500'}`}>Select Payment Method</p>
+                {/* Only show Cashfree for UPI/Card, keep COD as fallback */}
                 {['Instant UPI Transfer', 'Debit / Credit Card (Simulated)', 'Cash on Delivery'].map((method, i) => (
                   <motion.label
                     key={method}
@@ -458,26 +502,17 @@ const Checkout: React.FC<CheckoutProps> = ({ cart, theme, onUpdateQuantity, onRe
                   </motion.label>
                 ))}
 
-                {/* Simulated card */}
-                <AnimatePresence>
-                  {selectedMethod.includes('Card') && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className={`mt-4 space-y-4 rounded-2xl p-5 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-slate-50 border border-slate-200'}`}>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[#00D084]">Simulated Card Entry</p>
-                        <input readOnly value="4242 4242 4242 4242" className={`${inputCls} font-mono`} placeholder="Card number" />
-                        <div className="grid grid-cols-2 gap-4">
-                          <input readOnly value="12/28" className={inputCls} placeholder="MM/YY" />
-                          <input readOnly value="123" className={inputCls} placeholder="CVV" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* Cashfree payment button for UPI/Card */}
+                {(selectedMethod === 'Instant UPI Transfer' || selectedMethod.includes('Card')) && (
+                  <button
+                    type="button"
+                    className="mt-6 w-full rounded-xl bg-[#00D084] py-3 font-black text-white shadow-lg transition hover:bg-emerald-700"
+                    disabled={paymentState === 'processing'}
+                    onClick={handleCashfreePay}
+                  >
+                    {paymentState === 'processing' ? 'Processing...' : 'Pay with Cashfree'}
+                  </button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
