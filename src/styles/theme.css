@@ -1,0 +1,166 @@
+:root {
+  color-scheme: light;
+  --bg-gradient: radial-gradient(120% 120% at 20% 20%, #d9f7e8 0%, #f4fbf5 35%, #ffffff 60%),
+                  linear-gradient(180deg, #f5fff7 0%, #ffffff 38%, #f4fbf5 100%);
+  --bg-gradient-dark: radial-gradient(120% 120% at 20% 20%, #0d2a1e 0%, #071b14 45%, #050e0b 100%);
+  --fg-strong: #0f172a;
+  --fg-muted: #5b6b7a;
+  --fg-contrast: #e2fcef;
+  --brand: #10b981;
+  --brand-strong: #059669;
+  --brand-soft: #e6f7f0;
+  --card: #ffffff;
+  --card-dark: #0f172a;
+  --border: rgba(16, 185, 129, 0.12);
+  --border-dark: rgba(16, 185, 129, 0.22);
+  --shadow: 0 18px 50px -28px rgba(16, 185, 129, 0.55);
+  --shadow-soft: 0 10px 30px -22px rgba(15, 23, 42, 0.28);
+  --radius-lg: 32px;
+  --radius-md: 18px;
+  --radius-pill: 999px;
+  --transition: 200ms ease;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--fg-strong);
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  transition: background 400ms ease, color 200ms ease;
+}
+
+html.dark body {
+  background: var(--bg-gradient-dark);
+  color: var(--fg-contrast);
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: transparent;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+html.dark .card {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-soft);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 26px 65px -40px rgba(16, 185, 129, 0.75);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%);
+  color: white;
+  box-shadow: 0 14px 40px -18px rgba(16, 185, 129, 0.7);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 48px -18px rgba(16, 185, 129, 0.9);
+}
+
+.btn-secondary {
+  background: var(--brand-soft);
+  color: #064e3b;
+  border-color: var(--brand);
+}
+
+html.dark .btn-secondary {
+  background: rgba(16, 185, 129, 0.12);
+  color: #c3f3de;
+  border-color: var(--brand);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  background: rgba(16, 185, 129, 0.12);
+  color: #065f46;
+}
+
+html.dark .pill {
+  background: rgba(16, 185, 129, 0.18);
+  color: #b7f2d9;
+}
+
+.shadow-soft { box-shadow: var(--shadow-soft); }
+
+.glass {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(10px);
+}
+
+html.dark .glass {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 25%, rgba(148, 163, 184, 0.28) 37%, rgba(148, 163, 184, 0.18) 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.55);
+  outline-offset: 3px;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html.dark .badge-success {
+  background: rgba(16, 185, 129, 0.22);
+  color: #aff4d0;
+}
