@@ -121,6 +121,8 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
   const [awaitingTicketDetails, setAwaitingTicketDetails] = useState(false);
   const [voiceError, setVoiceError] = useState('');
   const [hasUnread, setHasUnread] = useState(false);
+  // Voice input state
+  const [isRecording, setIsRecording] = useState(false);
 
   const catalog = useMemo(
     () => medicines.map((medicine) => ({
@@ -155,10 +157,19 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     }
   };
 
+  // Fuzzy/lenient medicine matching logic
   const findMedicine = (query: string) => {
     const normalized = normalize(query);
-    return catalog.find((medicine) => normalized.includes(normalize(medicine.brand_name)) || normalized.includes(normalize(medicine.generic_name)))
-      ?? catalog.find((medicine) => medicine.searchText.includes(normalized));
+    // Fuzzy: match if input is included anywhere in brand or generic name
+    return (
+      catalog.find(
+        (medicine) =>
+          medicine.brand_name.toLowerCase().includes(normalized) ||
+          medicine.generic_name.toLowerCase().includes(normalized)
+      ) ||
+      // fallback: searchText includes input (for uses/indications)
+      catalog.find((medicine) => medicine.searchText.includes(normalized))
+    );
   };
 
   const createSupportTicket = async (issue: string): Promise<SupportTicketRecord> => {
@@ -245,19 +256,39 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     }
   };
 
+  // Web Speech API voice input logic
   const startVoice = () => {
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
       setVoiceError(localeCopy.unsupported);
       return;
     }
-
     recognitionRef.current?.stop();
     const recognition = new Recognition();
     recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.onresult = (event: SpeechRecognitionEventLike) => {
+      // Take the first final result
+      const transcript = event.results[0][0].transcript;
+      setInputText(transcript);
+      setIsRecording(false);
+    };
+    recognition.onerror = () => {
+      setVoiceError(localeCopy.noSpeech);
+      setIsRecording(false);
+    };
+    recognition.onend = () => setIsRecording(false);
+    recognitionRef.current = recognition;
+    setVoiceError('');
+    setIsRecording(true);
+    recognition.start();
+  };
+
+  const stopVoice = () => {
+    recognitionRef.current?.stop();
+    setIsRecording(false);
+  };
       const transcript = event.results[0]?.[0]?.transcript?.trim() ?? '';
       setInputText(transcript);
       if (transcript) {
@@ -296,36 +327,37 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
         pushMessage({ role: 'assistant', type: 'text', content: `Prescription notes extracted:\n${extracted}` });
       } catch {
         pushMessage({ role: 'assistant', type: 'text', content: localeCopy.imageError });
-      } finally {
-        setUploadBusy(false);
-      }
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const shellClass = isDark
-    ? 'border border-slate-800 bg-slate-950 text-slate-50'
-    : 'border border-emerald-100 bg-white text-slate-900 shadow-[0_28px_60px_-38px_rgba(22,163,74,0.34)]';
-
-  return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 flex flex-col items-stretch gap-3 sm:bottom-6 sm:left-auto sm:right-6 sm:items-end">
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 28 }}
-            className={`flex h-[78dvh] max-h-[700px] w-full max-w-full flex-col overflow-hidden rounded-[28px] shadow-2xl sm:h-[620px] sm:w-[420px] ${shellClass}`}
-          >
-            <div className="border-b border-emerald-100 bg-gradient-to-r from-emerald-600 via-emerald-700 to-green-800 px-4 py-4 text-white dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                  <ShieldCheck className="h-5 w-5 text-emerald-100" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black tracking-tight">{localeCopy.title}</p>
+      return (
+        <div>
+          {/* ...existing chat UI... */}
+          <div className="chatbot-input-row">
+            {/* ...existing input... */}
+            {/* Microphone button for voice input (Web Speech API) */}
+            <button
+              type="button"
+              aria-label="Start voice input"
+              onClick={isRecording ? stopVoice : startVoice}
+              className={`ml-2 p-2 rounded-full transition ${
+                isRecording ? 'bg-red-500 animate-pulse text-white' : 'bg-white text-green-700'
+              }`}
+            >
+              <Mic />
+            </button>
+            <button
+              type="button"
+              aria-label="Send"
+              onClick={() => generateReply(inputText)}
+              className="ml-2 p-2 rounded-full bg-green-600 text-white"
+            >
+              <Send />
+            </button>
+          </div>
+          {voiceError && (
+            <div className="text-xs text-red-500 mt-1">{voiceError}</div>
+          )}
+          {/* ...existing chat UI... */}
+        </div>
+      );
                   <p className="text-xs text-emerald-100/90">{localeCopy.subtitle}</p>
                 </div>
                 <button onClick={() => setIsOpen(false)} className="rounded-xl bg-white/10 p-2 text-slate-200 transition hover:bg-white/15">
