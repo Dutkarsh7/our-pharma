@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from '@supabase/supabase-js';
+import { Analytics } from '@vercel/analytics/react';
 import { AppState, ViewState, User, Medicine as PrescriptionMedicine, CartItem, Language, Theme } from './types';
 import { analyzePrescription } from './services/geminiService';
 import Header from './components/Header';
@@ -121,7 +122,7 @@ const translations = {
     delivery: "2 மணிநேர டெலிவரி செயலில் உள்ளது",
     tagline1: "உங்கள் மருந்துச் சீட்டு.",
     tagline2: "வேகமாக. புத்திசாலித்தனமாக. மலிவாக.",
-    description: "ஒரே மாதிரியான ஜெனரிக் உப்புகளைக் கண்டறிய உங்கள் மருந்துச் சீட்டை ஸ்கேன் செய்யுங்கள். அனைத்து முக்கிய மையங்களிலும் 2 மணிநேரத்தில் பயோ-சமமான மருந்துகளை வழங்குகிறோம்.",
+    description: "ஒரே மாதிரியான ஜெனரிக் உப்புகளைக் கண்டறிய உங்கள் மருந்துச் சீட்டை ஸ்கேன் ���ெய்யுங்கள். அனைத்து முக்கிய மையங்களிலும் 2 மணிநேரத்தில் பயோ-சமமான மருந்துகளை வழங்குகிறோம்.",
     scans: "சரிபார்க்கப்பட்ட உப்புகள்",
     gmp: "GMP மூலம் பெறப்பட்டது",
     pharma: "மருந்தாளர் சரிபார்க்கப்பட்டது",
@@ -823,6 +824,7 @@ const App: React.FC = () => {
 
       {/* Floating chat assistant – always visible */}
       <ChatBot theme={state.theme} language={state.language} />
+      <Analytics />
     </div>
   );
 };
