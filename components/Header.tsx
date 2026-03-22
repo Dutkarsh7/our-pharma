@@ -124,6 +124,18 @@ const Header: React.FC<HeaderProps> = ({
                   >
                     Meet the Founders
                   </button>
+                  <button 
+                    onClick={() => { onViewChange('contact'); setIsMenuOpen(false); }}
+                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
+                  >
+                    Contact Us
+                  </button>
+                  <button 
+                    onClick={() => { onViewChange('terms'); setIsMenuOpen(false); }}
+                    className={`min-h-11 w-full px-6 py-3 text-left text-xs font-bold transition-colors hover:bg-emerald-50 hover:text-emerald-700 ${theme === 'dark' ? 'text-[#A0AEC0]' : 'text-slate-600'}`}
+                  >
+                    Terms & Conditions
+                  </button>
                 </div>
               )}
             </div>
