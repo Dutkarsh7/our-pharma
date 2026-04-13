@@ -49,8 +49,10 @@ interface SpeechRecognitionLike {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives?: number;
+  onstart?: (() => void) | null;
   onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: { error?: string }) => void) | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
@@ -167,6 +169,23 @@ const useIntentPattern = /(use|used for|works for|indication|kis kam|किस �
 const priceIntentPattern = /(price|cost|kitne ka|कितने का|rate|savings)/i;
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+ ]/gi, ' ').replace(/\s+/g, ' ').trim();
+
+const getSpeechLocale = (language: Language): string => {
+  switch (language) {
+    case 'hi':
+      return 'hi-IN';
+    case 'bn':
+      return 'bn-IN';
+    case 'mr':
+      return 'mr-IN';
+    case 'te':
+      return 'te-IN';
+    case 'ta':
+      return 'ta-IN';
+    default:
+      return 'en-IN';
+  }
+};
 
 const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose }) => {
   const isDark = theme === 'dark';
@@ -338,26 +357,66 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
       setVoiceError(localeCopy.unsupported);
       return;
     }
+
     recognitionRef.current?.stop();
     const recognition = new Recognition();
-    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
+    recognition.lang = getSpeechLocale(language);
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setVoiceError('');
+      setIsRecording(true);
+      setIsListening(true);
+    };
+
     recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      // Take the first final result
-      const transcript = event.results[0][0].transcript;
-      setInputText(transcript);
+      const result = event.results[event.results.length - 1];
+      const transcript = result?.[0]?.transcript?.trim() || '';
+
+      if (transcript) {
+        setInputText(transcript);
+        setVoiceError('');
+      } else {
+        setVoiceError(localeCopy.noSpeech);
+      }
+
       setIsRecording(false);
+      setIsListening(false);
     };
-    recognition.onerror = () => {
-      setVoiceError(localeCopy.noSpeech);
+
+    recognition.onerror = (event: any) => {
+      const errorName = event?.error || 'unknown';
+
+      if (errorName === 'not-allowed' || errorName === 'service-not-allowed') {
+        setVoiceError('Microphone permission is blocked. Allow microphone access and try again.');
+      } else if (errorName === 'audio-capture') {
+        setVoiceError('No microphone was detected. Check your device microphone and try again.');
+      } else if (errorName === 'no-speech') {
+        setVoiceError(localeCopy.noSpeech);
+      } else {
+        setVoiceError(`Voice input failed (${errorName}). Please try again.`);
+      }
+
       setIsRecording(false);
+      setIsListening(false);
     };
-    recognition.onend = () => setIsRecording(false);
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      setIsListening(false);
+    };
+
     recognitionRef.current = recognition;
-    setVoiceError('');
-    setIsRecording(true);
-    recognition.start();
+
+    try {
+      recognition.start();
+    } catch {
+      setVoiceError('Voice input could not start in this browser. Please try Chrome on desktop.');
+      setIsRecording(false);
+      setIsListening(false);
+    }
   };
 
   const stopVoice = () => {
