@@ -214,7 +214,7 @@ const App: React.FC = () => {
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [authPrompt, setAuthPrompt] = useState('');
   const [consultationReason, setConsultationReason] = useState('General medical consultation');
-  const [chatOpenSignal, setChatOpenSignal] = useState(0);
+  const [chatOpenSignal, setChatOpenSignal] = useState<number | null>(null);
   const [showChatLauncher, setShowChatLauncher] = useState(true);
   const featuredMedicines = medicines.filter((medicine) => FEATURED_MEDICINE_NAMES.includes(medicine.brand_name));
 
@@ -431,7 +431,7 @@ const App: React.FC = () => {
   };
 
   const openChatAssistant = () => {
-    setChatOpenSignal((previous) => previous + 1);
+    setChatOpenSignal((previous) => (previous ?? 0) + 1);
     setShowChatLauncher(false);
   };
 

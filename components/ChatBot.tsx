@@ -9,7 +9,7 @@ import { supabase } from '../src/lib/supabase';
 interface ChatBotProps {
   theme: Theme;
   language: Language;
-  openSignal?: number;
+  openSignal?: number | null;
   onClose?: () => void;
 }
 
@@ -204,6 +204,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
   const [hasUnread, setHasUnread] = useState(false);
   // Voice input state
   const [isRecording, setIsRecording] = useState(false);
+  const lastOpenSignalRef = useRef<number | null>(null);
 
   const catalog = useMemo(
     () => medicines.map((medicine) => ({
@@ -221,10 +222,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
   }, [localeCopy.welcome]);
 
   useEffect(() => {
-    if (typeof openSignal === 'number') {
+    if (openSignal == null || openSignal === lastOpenSignalRef.current) {
+      return;
+    }
+
+    lastOpenSignalRef.current = openSignal;
       setIsOpen(true);
       setHasUnread(false);
-    }
   }, [openSignal]);
 
   useEffect(() => {

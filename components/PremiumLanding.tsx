@@ -526,13 +526,17 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
 
       <AnimatePresence>
         {showChatLauncher && (
-          <motion.div
+          <motion.button
             key="chat-launcher"
-            className="fixed bottom-24 right-4 z-50 overflow-hidden rounded-[28px] border border-emerald-200 bg-white shadow-[0_18px_40px_-20px_rgba(10,92,59,0.35)]"
+            type="button"
+            onClick={onOpenChat}
+            className="fixed bottom-24 right-4 z-50 overflow-hidden rounded-[28px] border border-emerald-200 bg-white text-left shadow-[0_18px_40px_-20px_rgba(10,92,59,0.35)]"
             initial={{ opacity: 0, y: 18, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 14, scale: 0.88, transition: { duration: 0.22, ease: 'easeInOut' } }}
             transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }}
+            whileHover={{ y: -2, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
           >
             <div className="flex items-stretch gap-0">
               <div className="flex items-center gap-3 px-4 py-3">
@@ -549,16 +553,11 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={onOpenChat}
-                className="min-w-[118px] border-l border-emerald-100 bg-emerald-600 px-4 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-white transition hover:bg-emerald-700"
-                aria-label="Open Mitra support chat"
-              >
+              <div className="min-w-[118px] border-l border-emerald-100 bg-emerald-600 px-4 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-white">
                 {t.chatAction}
-              </button>
+              </div>
             </div>
-          </motion.div>
+          </motion.button>
         )}
       </AnimatePresence>
     </div>
