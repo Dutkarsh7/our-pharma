@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import { Check, ClipboardPlus, FlaskConical, ScanSearch, Stethoscope, Upload, PackageCheck } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bot, Check, ClipboardPlus, FlaskConical, ScanSearch, Upload, PackageCheck } from 'lucide-react';
 import { Medicine as CatalogMedicine } from '../src/data/medicines';
 import { Language } from '../types';
 import './PremiumLanding.css';
@@ -16,9 +17,11 @@ interface PremiumLandingProps {
   locationLabel: string;
   featuredMedicines: CatalogMedicine[];
   founders: Founder[];
-  onUpload: (base64: string) => void;
+  onUpload: (base64: string, mimeType?: string) => void;
   onBrowseMedicines: () => void;
   onTalkToExpert: () => void;
+  onOpenChat: () => void;
+  showChatLauncher: boolean;
   onAddCatalogToCart: (medicine: CatalogMedicine, selectedType: 'brand' | 'generic') => void;
   isAnalyzing: boolean;
 }
@@ -46,6 +49,8 @@ const copy = {
     aboutTitle: 'Built by students, for every patient.',
     foundersTitle: 'The founders behind the mission.',
     footerCopy: 'Your Prescription. Faster. Smarter. Cheaper. Delivering bio-equivalent generic medicines across major hubs in India.',
+    chatLabel: 'Mitra Assistant',
+    chatHelper: 'Mitra here',
   },
   hi: {
     badge: '2 घंटे में डिलीवरी सक्रिय',
@@ -69,6 +74,108 @@ const copy = {
     aboutTitle: 'स्टूडेंट्स द्वारा बनाया गया, हर मरीज के लिए।',
     foundersTitle: 'हमारे मिशन के पीछे की टीम।',
     footerCopy: 'आपका नुस्खा। तेज़। स्मार्ट। सस्ता। भारत के प्रमुख शहरों में 2 घंटे में बायो-इक्विवेलेंट जेनेरिक दवाइयों की डिलीवरी।',
+    chatLabel: 'मित्रा असिस्टेंट',
+    chatHelper: 'मित्रा यहां है',
+  },
+  bn: {
+    badge: '২ ঘন্টার ডেলিভারি সক্রিয়',
+    titleA: 'আপনার প্রেসক্রিপশন।',
+    titleB: 'দ্রুত। স্মার্ট। সস্তা।',
+    subtitle:
+      'আপনার প্রেসক্রিপশন স্ক্যান করুন এবং ব্র্যান্ডের বদলে একই জেনেরিক সল্ট খুব কম দামে পান। ২ ঘণ্টার মধ্যে ডেলিভারি।',
+    uploadTitle: 'আপনার প্রেসক্রিপশন আপলোড করুন',
+    uploadBody: 'আমাদের Gemini AI প্রতিটি ওষুধকে সঙ্গে সঙ্গে একই জেনেরিক সল্টে ম্যাপ করে।',
+    uploadButton: 'আপলোড করে জেনেরিক খুঁজুন',
+    browse: 'ওষুধ দেখুন',
+    experts: 'বিশেষজ্ঞের সাথে কথা বলুন',
+    average: 'গড় সাশ্রয়',
+    time: 'ডেলিভারি সময়',
+    cities: 'কভার করা শহর',
+    listed: 'তালিকাভুক্ত ওষুধ',
+    howTitle: 'ভালো স্বাস্থ্যসেবার 3টি সহজ ধাপ।',
+    howSub: 'প্রেসক্রিপশন আপলোড থেকে ডেলিভারি পর্যন্ত পুরো প্রক্রিয়া কয়েক মিনিটেই।',
+    featuredTitle: 'শীর্ষ পছন্দ, বড় সাশ্রয়।',
+    reviewsTitle: 'বাস্তব রোগীদের বিশ্বাস।',
+    aboutTitle: 'ছাত্রদের তৈরি, প্রতিটি রোগীর জন্য।',
+    foundersTitle: 'মিশনের পেছনের দল।',
+    footerCopy: 'আপনার প্রেসক্রিপশন। দ্রুত। স্মার্ট। সস্তা। ভারতের প্রধান হাবে বায়ো-ইকুইভ্যালেন্ট জেনেরিক ওষুধ ডেলিভারি।',
+    chatLabel: 'মিত্রা সহকারী',
+    chatHelper: 'মিত্রা এখানে আছে',
+  },
+  mr: {
+    badge: '2 तास डिलिव्हरी सक्रिय',
+    titleA: 'तुमचे प्रिस्क्रिप्शन.',
+    titleB: 'वेगवान. स्मार्ट. स्वस्त.',
+    subtitle:
+      'तुमचे प्रिस्क्रिप्शन स्कॅन करा आणि ब्रँडऐवजी समान जेनेरिक सॉल्ट कमी किमतीत मिळवा. 2 तासांत डिलिव्हरी.',
+    uploadTitle: 'तुमचे प्रिस्क्रिप्शन अपलोड करा',
+    uploadBody: 'आमचा Gemini AI प्रत्येक औषधाला तत्काळ समान जेनेरिक सॉल्टशी मॅप करतो.',
+    uploadButton: 'अपलोड करा आणि जेनेरिक शोधा',
+    browse: 'औषधे पहा',
+    experts: 'तज्ञाशी बोला',
+    average: 'सरासरी बचत',
+    time: 'डिलिव्हरी वेळ',
+    cities: 'समाविष्ट शहरे',
+    listed: 'नोंदवलेली औषधे',
+    howTitle: 'चांगल्या आरोग्यसेवेचे 3 सोपे टप्पे.',
+    howSub: 'प्रिस्क्रिप्शन अपलोडपासून डिलिव्हरीपर्यंत संपूर्ण प्रक्रिया काही मिनिटांत.',
+    featuredTitle: 'शीर्ष निवडी, मोठी बचत.',
+    reviewsTitle: 'खऱ्या रुग्णांचा विश्वास.',
+    aboutTitle: 'विद्यार्थ्यांनी बनवलेले, प्रत्येक रुग्णासाठी.',
+    foundersTitle: 'मिशनमागील टीम.',
+    footerCopy: 'तुमचे प्रिस्क्रिप्शन. वेगवान. स्मार्ट. स्वस्त. भारतातील प्रमुख हबमध्ये बायो-इक्विव्हॅलेंट जेनेरिक औषधांची डिलिव्हरी.',
+    chatLabel: 'मित्रा सहाय्यक',
+    chatHelper: 'मित्रा इथे आहे',
+  },
+  te: {
+    badge: '2 గంటల డెలివరీ యాక్టివ్',
+    titleA: 'మీ ప్రిస్క్రిప్షన్.',
+    titleB: 'వేగంగా. తెలివిగా. చౌకగా.',
+    subtitle:
+      'మీ ప్రిస్క్రిప్షన్‌ను స్కాన్ చేసి బ్రాండ్ ధరలో తక్కువ ధరకు అదే జెనరిక్ సాల్ట్ పొందండి. 2 గంటల్లో డెలివరీ.',
+    uploadTitle: 'మీ ప్రిస్క్రిప్షన్‌ను అప్‌లోడ్ చేయండి',
+    uploadBody: 'మా Gemini AI ప్రతి మందును అదే జెనరిక్ సాల్ట్‌కు వెంటనే మ్యాప్ చేస్తుంది.',
+    uploadButton: 'అప్‌లోడ్ చేసి జెనరిక్స్ కనుగొనండి',
+    browse: 'మందులు చూడండి',
+    experts: 'నిపుణుడితో మాట్లాడండి',
+    average: 'సగటు ఆదా',
+    time: 'డెలివరీ సమయం',
+    cities: 'కవర్ చేసిన నగరాలు',
+    listed: 'జాబితాలో ఉన్న మందులు',
+    howTitle: 'మెరుగైన ఆరోగ్యసేవ కోసం 3 సులభ దశలు.',
+    howSub: 'ప్రిస్క్రిప్షన్ అప్‌లోడ్ నుంచి డెలివరీ వరకు మొత్తం ప్రక్రియ కొన్ని నిమిషాల్లో.',
+    featuredTitle: 'టాప్ ఎంపికలు, భారీ ఆదా.',
+    reviewsTitle: 'నిజమైన రోగుల నమ్మకం.',
+    aboutTitle: 'విద్యార్థులు రూపొందించినది, ప్రతి రోగికి.',
+    foundersTitle: 'మిషన్ వెనుక ఉన్న బృందం.',
+    footerCopy: 'మీ ప్రిస్క్రిప్షన్. వేగంగా. తెలివిగా. చౌకగా. భారత ప్రధాన హబ్‌లలో బయో-ఈక్వివాలెంట్ జెనరిక్ మందుల డెలివరీ.',
+    chatLabel: 'మిత్రా సహాయకుడు',
+    chatHelper: 'మిత్రా ఇక్కడ ఉంది',
+  },
+  ta: {
+    badge: '2 மணிநேர டெலிவரி செயலில் உள்ளது',
+    titleA: 'உங்கள் மருந்துச் சீட்டு.',
+    titleB: 'வேகமாக. புத்திசாலித்தனமாக. மலிவாக.',
+    subtitle:
+      'உங்கள் மருந்துச் சீட்டை ஸ்கேன் செய்து பிராண்ட் விலையின் ஒரு பகுதியிலே அதே ஜெனரிக் உப்புகளைப் பெறுங்கள். 2 மணிநேரத்தில் டெலிவரி.',
+    uploadTitle: 'உங்கள் மருந்துச் சீட்டை பதிவேற்றவும்',
+    uploadBody: 'எங்களின் Gemini AI ஒவ்வொரு மருந்தையும் உடனடியாக அதே ஜெனரிக் உப்புடன் பொருத்துகிறது.',
+    uploadButton: 'பதிவேற்று மற்றும் ஜெனரிக்குகளை கண்டறி',
+    browse: 'மருந்துகளைப் பாருங்கள்',
+    experts: 'நிபுணருடன் பேசுங்கள்',
+    average: 'சராசரி சேமிப்பு',
+    time: 'டெலிவரி நேரம்',
+    cities: 'உள்ளடக்கிய நகரங்கள்',
+    listed: 'பட்டியலிடப்பட்ட மருந்துகள்',
+    howTitle: 'சிறந்த சுகாதாரத்திற்கான 3 எளிய படிகள்.',
+    howSub: 'மருந்துச் சீட்டு பதிவேற்றத்திலிருந்து டெலிவரி வரை முழு செயல்முறையும் சில நிமிடங்களில்.',
+    featuredTitle: 'சிறந்த தேர்வுகள், அதிக சேமிப்பு.',
+    reviewsTitle: 'உண்மையான நோயாளிகளின் நம்பிக்கை.',
+    aboutTitle: 'மாணவர்களால் உருவாக்கப்பட்டது, ஒவ்வொரு நோயாளிக்கும்.',
+    foundersTitle: 'இயக்கத்தின் பின்னால் உள்ள குழு.',
+    footerCopy: 'உங்கள் மருந்துச் சீட்டு. வேகமாக. புத்திசாலித்தனமாக. மலிவாக. இந்தியாவின் முக்கிய மையங்களில் பயோ-சமமான ஜெனரிக் மருந்துகள் டெலிவரி.',
+    chatLabel: 'மித்ரா உதவியாளர்',
+    chatHelper: 'மித்ரா இங்கே இருக்கிறார்',
   },
 } as const;
 
@@ -103,6 +210,8 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
   onUpload,
   onBrowseMedicines,
   onTalkToExpert,
+  onOpenChat,
+  showChatLauncher,
   onAddCatalogToCart,
   isAnalyzing,
 }) => {
@@ -120,7 +229,7 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
       const dataUrl = typeof reader.result === 'string' ? reader.result : '';
       const base64 = dataUrl.split(',')[1];
       if (base64) {
-        onUpload(base64);
+        onUpload(base64, file.type || 'image/jpeg');
       }
     };
 
@@ -183,6 +292,10 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
             </button>
             <button className="op-btn-outline" type="button" onClick={onTalkToExpert}>
               {t.experts}
+            </button>
+            <button className="op-btn-outline" type="button" onClick={onOpenChat}>
+              <Bot size={16} />
+              Chat with Mitra Assistant
             </button>
           </div>
 
@@ -380,6 +493,7 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
             <ul>
               <li><button type="button" className="op-btn-link" onClick={onBrowseMedicines}>Browse Medicines</button></li>
               <li><button type="button" className="op-btn-link" onClick={onTalkToExpert}>Experts</button></li>
+              <li><button type="button" className="op-btn-link" onClick={onOpenChat}>Chat with Mitra Assistant</button></li>
               <li>Upload Prescription</li>
               <li>Generic Alternatives</li>
             </ul>
@@ -404,27 +518,35 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
         <div className="op-footer-bottom">Copyright 2026 OurPharma Private Ltd. Serviceable in Gurgaon, Bangalore, Mumbai and Gujarat hubs.</div>
       </footer>
 
-      <button
-        type="button"
-        onClick={onTalkToExpert}
-        style={{
-          position: 'fixed',
-          right: 16,
-          bottom: 92,
-          zIndex: 48,
-          width: 52,
-          height: 52,
-          borderRadius: 999,
-          border: 'none',
-          background: 'linear-gradient(135deg, #1fa864, #127a4f)',
-          color: '#ffffff',
-          boxShadow: '0 18px 40px -20px rgba(10,92,59,0.55)',
-          cursor: 'pointer',
-        }}
-        aria-label="Talk to an expert"
-      >
-        <Stethoscope size={22} style={{ margin: 'auto' }} />
-      </button>
+      <AnimatePresence>
+        {showChatLauncher && (
+          <motion.button
+            key="chat-launcher"
+            type="button"
+            onClick={onOpenChat}
+            className="fixed bottom-24 right-4 z-50 flex items-center gap-3 rounded-full border border-emerald-200 bg-white px-4 py-3 text-left shadow-[0_18px_40px_-20px_rgba(10,92,59,0.35)]"
+            aria-label="Chat with Mitra Assistant"
+            initial={{ opacity: 0, y: 18, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 14, scale: 0.88, transition: { duration: 0.22, ease: 'easeInOut' } }}
+            transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }}
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <motion.span
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white"
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <Bot size={20} />
+            </motion.span>
+            <span className="pr-1">
+              <span className="block text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">{t.chatLabel}</span>
+              <span className="block text-xs font-semibold text-slate-500">{t.chatHelper}</span>
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { supabase } from '../src/lib/supabase';
 interface ChatBotProps {
   theme: Theme;
   language: Language;
+  openSignal?: number;
 }
 
 type MessageRole = 'user' | 'assistant' | 'system';
@@ -70,7 +71,7 @@ const copy = {
   en: {
     title: 'Mitra Assistant',
     subtitle: 'Clinical guidance and support',
-    welcome: 'Hello. I can help you understand medicine generics, prices, uses, prescriptions, and order support.',
+    welcome: 'Hi, I am Mitra. I can help you understand medicine generics, prices, uses, prescriptions, and order support.',
     placeholder: 'Ask about a medicine or your order',
     listening: 'Listening...',
     quick: ['Generic for Augmentin', 'Use of Crocin 650', 'Order support', 'Upload prescription'],
@@ -85,7 +86,7 @@ const copy = {
   hi: {
     title: 'Mitra Assistant',
     subtitle: 'दवा और सहायता मार्गदर्शन',
-    welcome: 'नमस्ते। मैं दवा के generic, कीमत, उपयोग, prescription और order support में मदद कर सकता हूं।',
+    welcome: 'नमस्ते, मैं मित्रा हूं। मैं दवा के generic, कीमत, उपयोग, prescription और order support में मदद कर सकता हूं।',
     placeholder: 'दवा या order के बारे में पूछें',
     listening: 'सुन रहा हूं...',
     quick: ['Augmentin का generic', 'Crocin 650 किस काम आती है', 'Order support', 'Prescription upload करें'],
@@ -97,6 +98,66 @@ const copy = {
     analyzing: 'Prescription image की समीक्षा की जा रही है। कृपया थोड़ा प्रतीक्षा करें।',
     imageError: 'Prescription image साफ़ नहीं पढ़ी जा सकी। कृपया clearer photo upload करें।',
   },
+  bn: {
+    title: 'Mitra Assistant',
+    subtitle: 'ওষুধ ও সহায়তা নির্দেশনা',
+    welcome: 'হাই, আমি মিত্রা। ওষুধের generic, দাম, ব্যবহার, prescription এবং order support বুঝতে সাহায্য করতে পারি।',
+    placeholder: 'কোন ওষুধ বা order সম্পর্কে জিজ্ঞেস করুন',
+    listening: 'শুনছি...',
+    quick: ['Augmentin-এর generic', 'Crocin 650 কী কাজে লাগে', 'Order support', 'Prescription upload করুন'],
+    unsupported: 'Voice input Chrome বা Edge-এ কাজ করে।',
+    noSpeech: 'কিছু স্পষ্ট শোনা যায়নি। আবার চেষ্টা করুন।',
+    ticketPrompt: 'অনুগ্রহ করে আপনার order সমস্যাটি জানান। আমি support ticket তৈরি করব।',
+    ticketCreated: (ticketId: string) => `Support ticket ${ticketId} তৈরি হয়েছে। আমাদের support team শিগগিরই দেখবে।`,
+    fallback: 'আমি generic substitution, medicine uses, price comparison এবং order support-এ সাহায্য করতে পারি। কোনো medicine-এর নাম জিজ্ঞেস করুন।',
+    analyzing: 'আপনার prescription image পর্যালোচনা করা হচ্ছে। অনুগ্রহ করে একটু অপেক্ষা করুন।',
+    imageError: 'Prescription image পরিষ্কারভাবে পড়া যায়নি। অনুগ্রহ করে আরও পরিষ্কার ছবি আপলোড করুন।',
+  },
+  mr: {
+    title: 'Mitra Assistant',
+    subtitle: 'औषध आणि मदत मार्गदर्शन',
+    welcome: 'नमस्कार, मी मित्रा आहे. औषधांचे generic, किंमत, वापर, prescription आणि order support समजून घेण्यास मदत करू शकतो.',
+    placeholder: 'औषध किंवा order बद्दल विचारा',
+    listening: 'ऐकत आहे...',
+    quick: ['Augmentin चा generic', 'Crocin 650 कशासाठी वापरतात', 'Order support', 'Prescription upload करा'],
+    unsupported: 'Voice input Chrome किंवा Edge मध्ये चालते.',
+    noSpeech: 'काही स्पष्ट ऐकू आले नाही. कृपया पुन्हा बोला.',
+    ticketPrompt: 'कृपया तुमच्या order समस्येचे वर्णन करा. मी support ticket तयार करतो.',
+    ticketCreated: (ticketId: string) => `Support ticket ${ticketId} तयार झाला आहे. आमची support team लवकरच पाहील.`,
+    fallback: 'मी generic substitution, medicine uses, price comparison आणि order support मध्ये मदत करू शकतो. औषधाचे नाव विचारा.',
+    analyzing: 'तुमचे prescription image तपासले जात आहे. कृपया थोडा वेळ द्या.',
+    imageError: 'Prescription image स्पष्ट वाचता आली नाही. कृपया अधिक स्पष्ट फोटो अपलोड करा.',
+  },
+  te: {
+    title: 'Mitra Assistant',
+    subtitle: 'మందులు మరియు సహాయం మార్గదర్శనం',
+    welcome: 'హాయ్, నేను మిత్రా. మందుల generic, ధర, ఉపయోగం, prescription మరియు order support అర్థం చేసుకోవడంలో సహాయం చేస్తాను.',
+    placeholder: 'ఒక మందు లేదా మీ order గురించి అడగండి',
+    listening: 'వింటున్నాను...',
+    quick: ['Augmentin generic', 'Crocin 650 ఉపయోగం', 'Order support', 'Prescription upload చేయండి'],
+    unsupported: 'Voice input Chrome లేదా Edge లో పనిచేస్తుంది.',
+    noSpeech: 'స్పష్టంగా వినబడలేదు. మళ్లీ ప్రయత్నించండి.',
+    ticketPrompt: 'దయచేసి మీ order సమస్యను వివరించండి. నేను support ticket తయారు చేస్తాను.',
+    ticketCreated: (ticketId: string) => `Support ticket ${ticketId} రూపొందింది. మా support team త్వరలో చూస్తుంది.`,
+    fallback: 'నేను generic substitution, medicine uses, price comparison మరియు order support లో సహాయం చేయగలను. మందు పేరు అడగండి.',
+    analyzing: 'మీ prescription image ను పరిశీలిస్తున్నాం. దయచేసి కొంచెం వేచివుండండి.',
+    imageError: 'Prescription image స్పష్టంగా చదవలేకపోయాం. మరింత స్పష్టమైన ఫోటోను upload చేయండి.',
+  },
+  ta: {
+    title: 'Mitra Assistant',
+    subtitle: 'மருந்து மற்றும் உதவி வழிகாட்டுதல்',
+    welcome: 'வணக்கம், நான் மித்ரா. மருந்து generic, விலை, பயன்பாடு, prescription மற்றும் order support புரிய உதவுவேன்.',
+    placeholder: 'ஒரு மருந்து அல்லது உங்கள் order பற்றி கேளுங்கள்',
+    listening: 'கேட்கிறேன்...',
+    quick: ['Augmentin generic', 'Crocin 650 பயன்பாடு', 'Order support', 'Prescription upload செய்யவும்'],
+    unsupported: 'Voice input Chrome அல்லது Edge-இல் வேலை செய்கிறது.',
+    noSpeech: 'தெளிவாக எதுவும் கேட்கவில்லை. மீண்டும் முயற்சிக்கவும்.',
+    ticketPrompt: 'தயவுசெய்து உங்கள் order பிரச்சினையை விவரிக்கவும். நான் support ticket உருவாக்குகிறேன்.',
+    ticketCreated: (ticketId: string) => `Support ticket ${ticketId} உருவாக்கப்பட்டது. எங்கள் support team விரைவில் பார்க்கும்.`,
+    fallback: 'நான் generic substitution, medicine uses, price comparison மற்றும் order support-இல் உதவ முடியும். ஒரு மருந்தின் பெயரை கேளுங்கள்.',
+    analyzing: 'உங்கள் prescription image பரிசீலிக்கப்படுகிறது. சிறிது நேரம் காத்திருக்கவும்.',
+    imageError: 'Prescription image தெளிவாக படிக்க முடியவில்லை. மேலும் தெளிவான photo upload செய்யவும்.',
+  },
 } as const;
 
 const supportIntentPattern = /(issue with my order|order issue|order problem|problem with my order|support ticket|मेरे ऑर्डर में समस्या|ऑर्डर में दिक्कत|ऑर्डर issue)/i;
@@ -106,9 +167,9 @@ const priceIntentPattern = /(price|cost|kitne ka|कितने का|rate|sav
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+ ]/gi, ' ').replace(/\s+/g, ' ').trim();
 
-const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
+const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal }) => {
   const isDark = theme === 'dark';
-  const localeCopy = copy[language === 'hi' ? 'hi' : 'en'];
+  const localeCopy = copy[language];
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -138,6 +199,13 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language }) => {
     setInputText('');
     setVoiceError('');
   }, [localeCopy.welcome]);
+
+  useEffect(() => {
+    if (typeof openSignal === 'number') {
+      setIsOpen(true);
+      setHasUnread(false);
+    }
+  }, [openSignal]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

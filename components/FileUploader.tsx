@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Language } from '../types';
 
 interface FileUploaderProps {
-  onUpload: (base64: string) => void;
+  onUpload: (base64: string, mimeType?: string) => void;
   isAnalyzing: boolean;
   language: Language;
 }
@@ -49,7 +49,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, isAnalyzing, lang
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      onUpload(base64.split(',')[1]);
+      onUpload(base64.split(',')[1], file.type || 'image/jpeg');
     };
     reader.readAsDataURL(file);
   };

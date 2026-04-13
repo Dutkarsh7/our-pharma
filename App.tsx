@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from '@supabase/supabase-js';
 import { AppState, ViewState, User, Medicine as PrescriptionMedicine, CartItem, Language, Theme } from './types';
-import { analyzePrescription } from './services/geminiService';
+import { analyzePrescriptionWithFallback } from './services/geminiService';
 import Header from './components/Header';
 import AnalysisResult from './components/AnalysisResult';
 import AdminDashboard from './components/AdminDashboard';
@@ -214,6 +214,8 @@ const App: React.FC = () => {
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [authPrompt, setAuthPrompt] = useState('');
   const [consultationReason, setConsultationReason] = useState('General medical consultation');
+  const [chatOpenSignal, setChatOpenSignal] = useState(0);
+  const [showChatLauncher, setShowChatLauncher] = useState(true);
   const featuredMedicines = medicines.filter((medicine) => FEATURED_MEDICINE_NAMES.includes(medicine.brand_name));
 
   useEffect(() => {
@@ -318,11 +320,11 @@ const App: React.FC = () => {
     );
   };
 
-  const handleUpload = async (base64: string) => {
+  const handleUpload = async (base64: string, mimeType = 'image/jpeg') => {
     setState(prev => ({ ...prev, isAnalyzing: true, error: null, imagePreview: base64 }));
     
     try {
-      const result = await analyzePrescription(base64);
+      const result = await analyzePrescriptionWithFallback(base64, mimeType);
       setState(prev => ({ ...prev, isAnalyzing: false, result, view: 'analysis' }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Could not read prescription. Please use a clearer photo.';
@@ -426,6 +428,11 @@ const App: React.FC = () => {
   const openMedicalConsultation = (reason?: string) => {
     setConsultationReason(reason?.trim() || 'General medical consultation');
     setState((prev) => ({ ...prev, view: 'consultation' }));
+  };
+
+  const openChatAssistant = () => {
+    setChatOpenSignal((previous) => previous + 1);
+    setShowChatLauncher(false);
   };
 
   const setView = (v: ViewState) => setState(prev => ({ ...prev, view: v }));
@@ -577,6 +584,8 @@ const App: React.FC = () => {
               onUpload={handleUpload}
               onBrowseMedicines={() => setView('medicines')}
               onTalkToExpert={() => setView('experts')}
+              onOpenChat={openChatAssistant}
+              showChatLauncher={showChatLauncher}
               onAddCatalogToCart={handleAddCatalogToCart}
               isAnalyzing={state.isAnalyzing}
             />
@@ -822,7 +831,7 @@ const App: React.FC = () => {
       </footer>
 
       {/* Floating chat assistant – always visible */}
-      <ChatBot theme={state.theme} language={state.language} />
+      <ChatBot theme={state.theme} language={state.language} openSignal={chatOpenSignal} />
     </div>
   );
 };

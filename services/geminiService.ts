@@ -1,13 +1,132 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { PrescriptionAnalysis } from "../types";
+import { medicines as catalogMedicines, Medicine as CatalogMedicine } from "../src/data/medicines";
 
 const getGeminiApiKey = () => {
   const env = (import.meta as any).env;
   return env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || '';
 };
 
-export const analyzePrescription = async (base64Image: string): Promise<PrescriptionAnalysis> => {
+const normalizeText = (value: string): string =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const scoreMedicineMatch = (haystack: string, candidate: CatalogMedicine): number => {
+  const brand = normalizeText(candidate.brand_name);
+  const generic = normalizeText(candidate.generic_name);
+
+  if (!brand && !generic) return 0;
+
+  if (haystack.includes(brand)) return 0.98;
+  if (haystack.includes(generic)) return 0.9;
+
+  const words = brand.split(' ').filter((word) => word.length > 2);
+  if (!words.length) return 0;
+
+  const hits = words.filter((word) => haystack.includes(word)).length;
+  const ratio = hits / words.length;
+  return ratio >= 0.55 ? Math.min(0.88, ratio) : 0;
+};
+
+const inferCondition = (text: string): string => {
+  const normalized = normalizeText(text);
+
+  if (/(diabetes|metformin|insulin|glimepiride|glipizide)/.test(normalized)) return 'Diabetes Care';
+  if (/(blood pressure|hypertension|telmisartan|amlodipine|losartan|ramipril|metoprolol)/.test(normalized)) return 'Cardiac Care';
+  if (/(fever|pain|headache|paracetamol|crocin|dolo|aspirin)/.test(normalized)) return 'Pain and Fever';
+  if (/(infection|antibiotic|amoxicillin|azithromycin|augmentin)/.test(normalized)) return 'Infection Treatment';
+  if (/(acidity|gastric|ulcer|pantoprazole|omeprazole|domperidone|ranitidine)/.test(normalized)) return 'Digestive Care';
+  if (/(allergy|fexofenadine)/.test(normalized)) return 'Allergy Relief';
+
+  return 'General Care';
+};
+
+const buildFallbackAnalysis = (ocrText: string): PrescriptionAnalysis => {
+  const normalizedOcr = normalizeText(ocrText);
+
+  const matches = catalogMedicines
+    .map((medicine) => ({
+      medicine,
+      confidence: scoreMedicineMatch(normalizedOcr, medicine),
+    }))
+    .filter((item) => item.confidence > 0)
+    .sort((a, b) => {
+      if (b.confidence !== a.confidence) {
+        return b.confidence - a.confidence;
+      }
+
+      return (b.medicine.brand_price - b.medicine.generic_price) - (a.medicine.brand_price - a.medicine.generic_price);
+    })
+    .slice(0, 5);
+
+  if (!matches.length) {
+    throw new Error('Could not identify medicine names from the image. Please upload a clearer prescription or try again later.');
+  }
+
+  const medicines = matches.map(({ medicine }) => {
+    const savingsAmount = Math.max(0, medicine.brand_price - medicine.generic_price);
+    const savingsPercentage = medicine.brand_price > 0
+      ? Math.round((savingsAmount / medicine.brand_price) * 100)
+      : 0;
+    const condition = inferCondition(`${medicine.brand_name} ${medicine.generic_name} ${medicine.uses}`);
+    const availability: 'In Stock' = 'In Stock';
+
+    return {
+      originalName: medicine.brand_name,
+      activeSalt: medicine.generic_name,
+      strength: medicine.generic_name,
+      manufacturer: medicine.manufacturer,
+      brandedPrice: medicine.brand_price,
+      genericPrice: medicine.generic_price,
+      genericBrandName: medicine.generic_name,
+      tabletCount: 10,
+      availability,
+      deliveryTime: '2 Hours',
+      savingsPercentage,
+      savingsAmount,
+      monthlySavings: savingsAmount,
+      benefits: [
+        'Same active ingredient as the branded medicine',
+        `Estimated savings of ₹${savingsAmount.toLocaleString('en-IN')} per pack`,
+        'Fast local fulfillment with pharmacist verification'
+      ],
+      uses: medicine.uses,
+      drugClass: condition,
+      sideEffects: medicine.side_effects.join(', '),
+      dosage: 'Follow the prescription label and your doctor\'s directions.',
+      rxRequired: true,
+      isNarcotic: false,
+      category: condition,
+    } satisfies PrescriptionAnalysis['medicines'][number];
+  });
+
+  const totalBrandedCost = medicines.reduce((sum, item) => sum + item.brandedPrice, 0);
+  const totalGenericCost = medicines.reduce((sum, item) => sum + item.genericPrice, 0);
+  const totalSavings = totalBrandedCost - totalGenericCost;
+  const monthlySavingsTotal = medicines.reduce((sum, item) => sum + item.monthlySavings, 0);
+
+  return {
+    medicines,
+    totalBrandedCost,
+    totalGenericCost,
+    totalSavings,
+    monthlySavingsTotal,
+    patientAdvice: 'Our AI analysis service is temporarily busy, so this scan was matched locally from the catalog. Please verify the medicines against your prescription before ordering.',
+    detectedCondition: inferCondition(normalizedOcr),
+  };
+};
+
+const isTransientGeminiError = (error: unknown): boolean => {
+  if (!(error instanceof Error)) return false;
+
+  return /503|unavailable|high demand|temporarily|overloaded|try again later/i.test(error.message);
+};
+
+export const analyzePrescription = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
   const apiKey = getGeminiApiKey();
 
   if (!apiKey) {
@@ -15,7 +134,7 @@ export const analyzePrescription = async (base64Image: string): Promise<Prescrip
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const model = "gemini-3-flash-preview";
+  const model = 'gemini-2.0-flash';
   
   const prompt = `
     Act as a senior clinical pharmacist. Analyze this prescription image with extreme precision.
@@ -39,7 +158,7 @@ export const analyzePrescription = async (base64Image: string): Promise<Prescrip
     model,
     contents: {
       parts: [
-        { inlineData: { mimeType: "image/jpeg", data: base64Image } },
+        { inlineData: { mimeType, data: base64Image } },
         { text: prompt }
       ]
     },
@@ -85,8 +204,25 @@ export const analyzePrescription = async (base64Image: string): Promise<Prescrip
     }
   });
 
-  if (!response.text) throw new Error("Analysis failed. Please ensure the prescription is well-lit and readable.");
+  if (!response.text) throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
   return JSON.parse(response.text.trim());
+};
+
+export const analyzePrescriptionWithFallback = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
+  try {
+    return await analyzePrescription(base64Image, mimeType);
+  } catch (error) {
+    try {
+      const ocrText = await extractPrescriptionTextFromImage(base64Image, mimeType);
+      return buildFallbackAnalysis(ocrText);
+    } catch {
+      if (isTransientGeminiError(error)) {
+        throw new Error('Scan service is temporarily unavailable. Please try again in a minute with a clearer image.');
+      }
+
+      throw error;
+    }
+  }
 };
 
 const LANG_NAMES: Record<string, string> = {
