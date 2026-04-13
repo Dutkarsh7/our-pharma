@@ -51,6 +51,7 @@ const copy = {
     footerCopy: 'Your Prescription. Faster. Smarter. Cheaper. Delivering bio-equivalent generic medicines across major hubs in India.',
     chatLabel: 'Mitra Assistant',
     chatHelper: 'Mitra here',
+    chatAction: 'Mitra Support',
   },
   hi: {
     badge: '2 घंटे में डिलीवरी सक्रिय',
@@ -76,6 +77,7 @@ const copy = {
     footerCopy: 'आपका नुस्खा। तेज़। स्मार्ट। सस्ता। भारत के प्रमुख शहरों में 2 घंटे में बायो-इक्विवेलेंट जेनेरिक दवाइयों की डिलीवरी।',
     chatLabel: 'मित्रा असिस्टेंट',
     chatHelper: 'मित्रा यहां है',
+    chatAction: 'मित्रा सपोर्ट',
   },
   bn: {
     badge: '২ ঘন্টার ডেলিভারি সক্রিয়',
@@ -101,6 +103,7 @@ const copy = {
     footerCopy: 'আপনার প্রেসক্রিপশন। দ্রুত। স্মার্ট। সস্তা। ভারতের প্রধান হাবে বায়ো-ইকুইভ্যালেন্ট জেনেরিক ওষুধ ডেলিভারি।',
     chatLabel: 'মিত্রা সহকারী',
     chatHelper: 'মিত্রা এখানে আছে',
+    chatAction: 'মিত্রা সাপোর্ট',
   },
   mr: {
     badge: '2 तास डिलिव्हरी सक्रिय',
@@ -126,6 +129,7 @@ const copy = {
     footerCopy: 'तुमचे प्रिस्क्रिप्शन. वेगवान. स्मार्ट. स्वस्त. भारतातील प्रमुख हबमध्ये बायो-इक्विव्हॅलेंट जेनेरिक औषधांची डिलिव्हरी.',
     chatLabel: 'मित्रा सहाय्यक',
     chatHelper: 'मित्रा इथे आहे',
+    chatAction: 'मित्रा सपोर्ट',
   },
   te: {
     badge: '2 గంటల డెలివరీ యాక్టివ్',
@@ -151,6 +155,7 @@ const copy = {
     footerCopy: 'మీ ప్రిస్క్రిప్షన్. వేగంగా. తెలివిగా. చౌకగా. భారత ప్రధాన హబ్‌లలో బయో-ఈక్వివాలెంట్ జెనరిక్ మందుల డెలివరీ.',
     chatLabel: 'మిత్రా సహాయకుడు',
     chatHelper: 'మిత్రా ఇక్కడ ఉంది',
+    chatAction: 'మిత్రా సపోర్ట్',
   },
   ta: {
     badge: '2 மணிநேர டெலிவரி செயலில் உள்ளது',
@@ -176,6 +181,7 @@ const copy = {
     footerCopy: 'உங்கள் மருந்துச் சீட்டு. வேகமாக. புத்திசாலித்தனமாக. மலிவாக. இந்தியாவின் முக்கிய மையங்களில் பயோ-சமமான ஜெனரிக் மருந்துகள் டெலிவரி.',
     chatLabel: 'மித்ரா உதவியாளர்',
     chatHelper: 'மித்ரா இங்கே இருக்கிறார்',
+    chatAction: 'மித்ரா ஆதரவு',
   },
 } as const;
 
@@ -520,31 +526,39 @@ const PremiumLanding: React.FC<PremiumLandingProps> = ({
 
       <AnimatePresence>
         {showChatLauncher && (
-          <motion.button
+          <motion.div
             key="chat-launcher"
-            type="button"
-            onClick={onOpenChat}
-            className="fixed bottom-24 right-4 z-50 flex items-center gap-3 rounded-full border border-emerald-200 bg-white px-4 py-3 text-left shadow-[0_18px_40px_-20px_rgba(10,92,59,0.35)]"
-            aria-label="Chat with Mitra Assistant"
+            className="fixed bottom-24 right-4 z-50 overflow-hidden rounded-[28px] border border-emerald-200 bg-white shadow-[0_18px_40px_-20px_rgba(10,92,59,0.35)]"
             initial={{ opacity: 0, y: 18, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 14, scale: 0.88, transition: { duration: 0.22, ease: 'easeInOut' } }}
             transition={{ duration: 0.38, ease: [0.2, 0.8, 0.2, 1] }}
-            whileHover={{ y: -2, scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
           >
-            <motion.span
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <Bot size={20} />
-            </motion.span>
-            <span className="pr-1">
-              <span className="block text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">{t.chatLabel}</span>
-              <span className="block text-xs font-semibold text-slate-500">{t.chatHelper}</span>
-            </span>
-          </motion.button>
+            <div className="flex items-stretch gap-0">
+              <div className="flex items-center gap-3 px-4 py-3">
+                <motion.span
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Bot size={20} />
+                </motion.span>
+                <span className="pr-2">
+                  <span className="block text-[10px] font-black uppercase tracking-[0.28em] text-emerald-700">{t.chatLabel}</span>
+                  <span className="block text-xs font-semibold text-slate-500">{t.chatHelper}</span>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={onOpenChat}
+                className="min-w-[118px] border-l border-emerald-100 bg-emerald-600 px-4 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-white transition hover:bg-emerald-700"
+                aria-label="Open Mitra support chat"
+              >
+                {t.chatAction}
+              </button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
