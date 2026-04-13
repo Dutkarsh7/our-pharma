@@ -10,6 +10,7 @@ interface ChatBotProps {
   theme: Theme;
   language: Language;
   openSignal?: number;
+  onClose?: () => void;
 }
 
 type MessageRole = 'user' | 'assistant' | 'system';
@@ -167,7 +168,7 @@ const priceIntentPattern = /(price|cost|kitne ka|कितने का|rate|sav
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+ ]/gi, ' ').replace(/\s+/g, ' ').trim();
 
-const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal }) => {
+const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose }) => {
   const isDark = theme === 'dark';
   const localeCopy = copy[language];
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -223,6 +224,12 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal }) => {
     if (!isOpen && message.role !== 'user') {
       setHasUnread(true);
     }
+  };
+
+  const closeChat = () => {
+    setIsOpen(false);
+    setHasUnread(false);
+    onClose?.();
   };
 
   // Fuzzy/lenient medicine matching logic
@@ -382,11 +389,157 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal }) => {
     reader.readAsDataURL(file);
   };
 
-  // Main return for ChatBot component
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await generateReply(inputText);
+  };
+
   return (
-    <div>
-      {/* ...existing UI code, including AnimatePresence, quick buttons, chat messages, input, etc. ... */}
-    </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-[60] bg-slate-950/20 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={closeChat}
+          />
+
+          <motion.section
+            className={`fixed bottom-4 right-4 z-[70] flex h-[min(84vh,760px)] w-[min(92vw,420px)] flex-col overflow-hidden rounded-[32px] border shadow-[0_30px_90px_-30px_rgba(15,118,110,0.45)] ${isDark ? 'border-white/10 bg-slate-950 text-slate-50' : 'border-emerald-100 bg-white text-slate-900'}`}
+            initial={{ opacity: 0, y: 32, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.9 }}
+          >
+            <div className={`flex items-start justify-between gap-3 border-b px-5 py-4 ${isDark ? 'border-white/10 bg-white/5' : 'border-emerald-100 bg-emerald-50/60'}`}>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.32em] text-emerald-600">{localeCopy.title}</p>
+                <h3 className="mt-1 text-lg font-black tracking-tight">{localeCopy.subtitle}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={closeChat}
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition hover:scale-105 ${isDark ? 'bg-white/10 text-slate-100' : 'bg-white text-slate-600 shadow-sm'}`}
+                aria-label="Close chat"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              <div className="mb-4 flex flex-wrap gap-2">
+                {localeCopy.quick.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => void generateReply(item)}
+                    className={`rounded-full px-3 py-2 text-[11px] font-bold transition ${isDark ? 'bg-white/8 text-slate-200 hover:bg-white/12' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-3">
+                {messages.map((message) => (
+                  <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[82%] rounded-3xl px-4 py-3 text-sm leading-relaxed ${message.role === 'user' ? 'bg-emerald-600 text-white' : message.type === 'ticket' ? 'border border-emerald-200 bg-emerald-50 text-emerald-900' : isDark ? 'bg-white/8 text-slate-100' : 'bg-slate-100 text-slate-800'}`}>
+                      {message.imagePreview && (
+                        <img src={message.imagePreview} alt="Uploaded prescription" className="mb-3 max-h-40 w-full rounded-2xl object-cover" />
+                      )}
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                      <p className={`mt-2 text-[10px] font-semibold uppercase tracking-[0.24em] ${message.role === 'user' ? 'text-white/70' : 'text-slate-400'}`}>{message.time}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className={`rounded-3xl px-4 py-3 text-sm ${isDark ? 'bg-white/8 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>
+                      {localeCopy.listening}
+                    </div>
+                  </div>
+                )}
+
+                {uploadBusy && (
+                  <div className="flex justify-start">
+                    <div className={`rounded-3xl px-4 py-3 text-sm ${isDark ? 'bg-white/8 text-slate-200' : 'bg-slate-100 text-slate-700'}`}>
+                      {localeCopy.analyzing}
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            <div className={`border-t px-4 py-3 ${isDark ? 'border-white/10 bg-slate-950' : 'border-emerald-100 bg-white'}`}>
+              {voiceError && <p className="mb-2 text-[11px] font-semibold text-amber-500">{voiceError}</p>}
+              <form onSubmit={handleSubmit} className="flex items-end gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void handleImageFile(file);
+                    }
+                    event.target.value = '';
+                  }}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl transition hover:scale-105 ${isDark ? 'bg-white/10 text-slate-100' : 'bg-emerald-50 text-emerald-700'}`}
+                  aria-label="Upload prescription"
+                >
+                  <Camera size={18} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={isRecording ? stopVoice : startVoice}
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl transition hover:scale-105 ${isRecording ? 'bg-rose-500 text-white' : isDark ? 'bg-white/10 text-slate-100' : 'bg-emerald-50 text-emerald-700'}`}
+                  aria-label="Voice input"
+                >
+                  <Mic size={18} />
+                </button>
+
+                <div className="flex-1">
+                  <input
+                    value={inputText}
+                    onChange={(event) => setInputText(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
+                        void generateReply(inputText);
+                      }
+                    }}
+                    placeholder={isRecording ? localeCopy.listening : localeCopy.placeholder}
+                    className={`min-h-11 w-full rounded-2xl px-4 py-3 text-sm outline-none transition ${isDark ? 'border border-white/10 bg-white/5 text-slate-50 placeholder:text-slate-500' : 'border border-emerald-100 bg-slate-50 text-slate-900 placeholder:text-slate-400'}`}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white transition hover:bg-emerald-700 hover:scale-105 disabled:opacity-50"
+                  disabled={!inputText.trim() || isTyping}
+                  aria-label="Send message"
+                >
+                  <Send size={18} />
+                </button>
+              </form>
+            </div>
+          </motion.section>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

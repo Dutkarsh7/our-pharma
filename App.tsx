@@ -435,6 +435,10 @@ const App: React.FC = () => {
     setShowChatLauncher(false);
   };
 
+  const closeChatAssistant = () => {
+    setShowChatLauncher(true);
+  };
+
   const setView = (v: ViewState) => setState(prev => ({ ...prev, view: v }));
 
   const reset = () => {
@@ -831,7 +835,7 @@ const App: React.FC = () => {
       </footer>
 
       {/* Floating chat assistant – always visible */}
-      <ChatBot theme={state.theme} language={state.language} openSignal={chatOpenSignal} />
+      <ChatBot theme={state.theme} language={state.language} openSignal={chatOpenSignal} onClose={closeChatAssistant} />
     </div>
   );
 };
