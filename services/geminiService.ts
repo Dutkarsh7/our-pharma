@@ -31,6 +31,7 @@ const getGeminiApiKey = () => {
 };
 
 const isBrowser = typeof window !== 'undefined' && typeof fetch !== 'undefined';
+const isViteDev = typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.DEV);
 
 const callGeminiProxy = async <T>(payload: Record<string, unknown>): Promise<T> => {
   if (!isBrowser) {
@@ -261,14 +262,19 @@ const isTransientGeminiError = (error: unknown): boolean => {
 };
 
 export const analyzePrescription = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
-  try {
-    return await callGeminiProxy<PrescriptionAnalysis>({
-      action: 'analyze' satisfies GeminiAction,
-      base64Image,
-      mimeType,
-    });
-  } catch (proxyError) {
-    console.warn('[Gemini proxy analyze fallback]', proxyError);
+  if (isBrowser) {
+    try {
+      return await callGeminiProxy<PrescriptionAnalysis>({
+        action: 'analyze' satisfies GeminiAction,
+        base64Image,
+        mimeType,
+      });
+    } catch (proxyError) {
+      console.warn('[Gemini proxy analyze fallback]', proxyError);
+      if (!isViteDev) {
+        throw new Error('Gemini scan endpoint failed on the server. Check that Vercel has GEMINI_API_KEY set and redeploy the app.');
+      }
+    }
   }
 
   const apiKey = getGeminiApiKey();
@@ -391,14 +397,22 @@ export const chatWithPharmaBot = async (
   userMessage: string,
   language: string
 ): Promise<{ reply: string; shouldEscalate: boolean }> => {
-  try {
-    return await callGeminiProxy<{ reply: string; shouldEscalate: boolean }>({
-      action: 'chat' satisfies GeminiAction,
-      userMessage,
-      language,
-    });
-  } catch (proxyError) {
-    console.warn('[Gemini proxy chat fallback]', proxyError);
+  if (isBrowser) {
+    try {
+      return await callGeminiProxy<{ reply: string; shouldEscalate: boolean }>({
+        action: 'chat' satisfies GeminiAction,
+        userMessage,
+        language,
+      });
+    } catch (proxyError) {
+      console.warn('[Gemini proxy chat fallback]', proxyError);
+      if (!isViteDev) {
+        return {
+          reply: FALLBACKS[language] || FALLBACKS.en,
+          shouldEscalate: true,
+        };
+      }
+    }
   }
 
   const apiKey = getGeminiApiKey();
@@ -470,14 +484,19 @@ export const extractPrescriptionTextFromImage = async (
   base64Image: string,
   mimeType: string
 ): Promise<string> => {
-  try {
-    return await callGeminiProxy<string>({
-      action: 'ocr' satisfies GeminiAction,
-      base64Image,
-      mimeType,
-    });
-  } catch (proxyError) {
-    console.warn('[Gemini proxy OCR fallback]', proxyError);
+  if (isBrowser) {
+    try {
+      return await callGeminiProxy<string>({
+        action: 'ocr' satisfies GeminiAction,
+        base64Image,
+        mimeType,
+      });
+    } catch (proxyError) {
+      console.warn('[Gemini proxy OCR fallback]', proxyError);
+      if (!isViteDev) {
+        throw new Error('Gemini OCR endpoint failed on the server. Check that Vercel has GEMINI_API_KEY set and redeploy the app.');
+      }
+    }
   }
 
   const apiKey = getGeminiApiKey();
