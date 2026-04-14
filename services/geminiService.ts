@@ -8,6 +8,12 @@ interface GeminiErrorPayload {
     code?: number;
     message?: string;
     status?: string;
+    details?: Array<{
+      message?: string;
+      retryDelay?: string;
+      quotaMetric?: string;
+      quotaId?: string;
+    }>;
   };
 }
 
@@ -36,13 +42,59 @@ const parseGeminiErrorPayload = (message: string): GeminiErrorPayload | null => 
   }
 };
 
-const getErrorText = (error: unknown): string => {
-  if (error instanceof Error) {
-    const payload = parseGeminiErrorPayload(error.message);
-    return payload?.error?.message || error.message;
+const extractNestedErrorText = (value: unknown): string => {
+  if (!value) return '';
+
+  if (typeof value === 'string') {
+    return value;
   }
 
-  return String(error || 'Unknown error');
+  if (Array.isArray(value)) {
+    return value.map(extractNestedErrorText).filter(Boolean).join(' ');
+  }
+
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    const parts = [
+      record.message,
+      record.status,
+      record.code,
+      record.retryDelay,
+      record.quotaMetric,
+      record.quotaId,
+      record.reason,
+      record.details,
+      record.error,
+    ]
+      .map(extractNestedErrorText)
+      .filter(Boolean);
+
+    if (parts.length) {
+      return parts.join(' ');
+    }
+
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return '';
+    }
+  }
+
+  return String(value);
+};
+
+const getErrorText = (error: unknown): string => {
+  if (typeof error === 'string') {
+    const payload = parseGeminiErrorPayload(error);
+    return payload?.error?.message || error;
+  }
+
+  if (error instanceof Error) {
+    const payload = parseGeminiErrorPayload(error.message);
+    return payload?.error?.message || extractNestedErrorText(error);
+  }
+
+  return extractNestedErrorText(error) || 'Unknown error';
 };
 
 const isQuotaOrRateLimitError = (error: unknown): boolean =>
