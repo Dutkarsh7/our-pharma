@@ -5,8 +5,13 @@ const getGeminiApiKey = () => process.env.GEMINI_API_KEY || process.env.VITE_GEM
 const GEMINI_ANALYZE_MODEL = 'gemini-2.0-flash';
 const GEMINI_OCR_MODEL = 'gemini-2.0-flash';
 const GEMINI_CHAT_MODEL = 'gemini-2.0-flash';
+const GEMINI_MIN_REQUEST_INTERVAL_MS = 1000;
+const MAX_RETRY_COUNT = 3;
+const RETRY_DELAYS_MS = [1000, 2000, 4000];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+let geminiRequestQueue: Promise<void> = Promise.resolve();
+let nextGeminiRequestAt = 0;
 
 const getErrorText = (error: unknown): string => {
   if (typeof error === 'string') return error;
@@ -38,13 +43,23 @@ const isTransientGeminiError = (errorText: string): boolean =>
 const isRetryableGeminiError = (errorText: string): boolean =>
   isQuotaOrRateLimitError(errorText) || isTransientGeminiError(errorText);
 
-const withRetry = async <T>(operation: () => Promise<T>, label: string, maxAttempts = 3): Promise<T> => {
+const extractRetrySeconds = (errorText: string): number | null => {
+  const retryDelayMatch = errorText.match(/retry\s*delay[^0-9]*(\d+)/i);
+  if (retryDelayMatch) return Number(retryDelayMatch[1]);
+
+  const secondsMatch = errorText.match(/(\d+)\s*(s|sec|secs|second|seconds)\b/i);
+  if (secondsMatch) return Number(secondsMatch[1]);
+
+  return null;
+};
+
+const withRetry = async <T>(operation: () => Promise<T>, label: string): Promise<T> => {
   let lastError: unknown;
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+  for (let attempt = 0; attempt <= MAX_RETRY_COUNT; attempt += 1) {
     try {
-      if (attempt > 1) {
-        console.warn(`[Gemini proxy] retrying ${label}; attempt ${attempt}/${maxAttempts}`);
+      if (attempt > 0) {
+        console.warn(`[Gemini proxy] retrying ${label}; attempt ${attempt}/${MAX_RETRY_COUNT}`);
       }
 
       return await operation();
@@ -52,23 +67,55 @@ const withRetry = async <T>(operation: () => Promise<T>, label: string, maxAttem
       lastError = error;
       const errorText = getErrorText(error);
 
-      if (!isRetryableGeminiError(errorText) || attempt === maxAttempts) {
+      if (!isRetryableGeminiError(errorText) || attempt === MAX_RETRY_COUNT) {
         break;
       }
 
-      const backoffMs = 500 * 2 ** (attempt - 1);
-      await sleep(backoffMs);
+      const retryInMs = RETRY_DELAYS_MS[attempt] ?? RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1];
+      await sleep(retryInMs);
     }
   }
 
   throw lastError;
 };
 
+const queueGeminiTask = async <T>(operation: () => Promise<T>, label: string): Promise<T> => {
+  let resolveTask: (value: T | PromiseLike<T>) => void = () => undefined;
+  let rejectTask: (reason?: unknown) => void = () => undefined;
+
+  const task = new Promise<T>((resolve, reject) => {
+    resolveTask = resolve;
+    rejectTask = reject;
+  });
+
+  geminiRequestQueue = geminiRequestQueue
+    .catch(() => undefined)
+    .then(async () => {
+      const now = Date.now();
+      const waitMs = Math.max(0, nextGeminiRequestAt - now);
+      if (waitMs > 0) {
+        console.info(`[Gemini proxy] queued ${label} for ${waitMs}ms to avoid rate limits`);
+        await sleep(waitMs);
+      }
+
+      nextGeminiRequestAt = Date.now() + GEMINI_MIN_REQUEST_INTERVAL_MS;
+
+      try {
+        resolveTask(await withRetry(operation, label));
+      } catch (error) {
+        rejectTask(error);
+      }
+    });
+
+  return task;
+};
+
 const formatGeminiError = (error: unknown, fallbackMessage: string): string => {
   const text = error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error || {});
 
   if (isQuotaOrRateLimitError(text)) {
-    return 'Mitra AI is currently at usage limit. Please retry in a minute. If this continues, check your Gemini API quota and billing settings.';
+    const retrySeconds = extractRetrySeconds(text) ?? 15;
+    return `Rate limit reached (429). Please wait before scanning again. Next retry in ${retrySeconds} seconds.`;
   }
 
   if (isAuthOrApiKeyError(text)) {
@@ -155,7 +202,7 @@ const handleAnalyze = async (base64Image: string, mimeType: string) => {
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await withRetry(() => ai.models.generateContent({
+  const response = await ai.models.generateContent({
     model: GEMINI_ANALYZE_MODEL,
     contents: {
       parts: [
@@ -179,7 +226,7 @@ const handleAnalyze = async (base64Image: string, mimeType: string) => {
         required: ['medicines', 'totalBrandedCost', 'totalGenericCost', 'totalSavings', 'monthlySavingsTotal', 'patientAdvice'],
       },
     },
-  }), 'analyze');
+  });
 
   if (!response.text) {
     throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
@@ -195,7 +242,7 @@ const handleOcr = async (base64Image: string, mimeType: string) => {
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await withRetry(() => ai.models.generateContent({
+  const response = await ai.models.generateContent({
     model: GEMINI_OCR_MODEL,
     contents: {
       parts: [
@@ -203,7 +250,7 @@ const handleOcr = async (base64Image: string, mimeType: string) => {
         { inlineData: { data: base64Image, mimeType } },
       ],
     },
-  }), 'ocr');
+  });
 
   const text = (response.text || '').trim();
   if (!text) {
@@ -254,10 +301,10 @@ User message: ${userMessage}
 
 Reply now in ${respondIn}:`;
 
-  const response = await withRetry(() => ai.models.generateContent({
+  const response = await ai.models.generateContent({
     model: GEMINI_CHAT_MODEL,
     contents: { parts: [{ text: prompt }] },
-  }), 'chat');
+  });
 
   const reply = (response.text || '').trim() || fallbackReply;
   const escalationFromReply = [
@@ -281,17 +328,17 @@ export default async function handler(req: any, res: any) {
     console.info('[Gemini proxy] action:', action);
 
     if (action === 'analyze') {
-      const data = await handleAnalyze(body.base64Image, body.mimeType || 'image/jpeg');
+      const data = await queueGeminiTask(() => handleAnalyze(body.base64Image, body.mimeType || 'image/jpeg'), 'analyze');
       return res.status(200).json({ ok: true, data });
     }
 
     if (action === 'ocr') {
-      const data = await handleOcr(body.base64Image, body.mimeType || 'image/jpeg');
+      const data = await queueGeminiTask(() => handleOcr(body.base64Image, body.mimeType || 'image/jpeg'), 'ocr');
       return res.status(200).json({ ok: true, data });
     }
 
     if (action === 'chat') {
-      const data = await handleChat(body.userMessage || '', body.language || 'en');
+      const data = await queueGeminiTask(() => handleChat(body.userMessage || '', body.language || 'en'), 'chat');
       return res.status(200).json({ ok: true, data });
     }
 

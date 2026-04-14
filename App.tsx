@@ -41,6 +41,13 @@ const detectInitialLanguage = (): Language => {
   return 'en';
 };
 
+const parseRetryCountdownSeconds = (message: string): number => {
+  const match = message.match(/next retry in\s*(\d+)\s*seconds?/i) || message.match(/retry in\s*(\d+)\s*seconds?/i);
+  if (!match) return 0;
+  const seconds = Number(match[1]);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : 0;
+};
+
 const translations = {
   en: {
     delivery: "2 Hour Delivery Active",
@@ -216,7 +223,18 @@ const App: React.FC = () => {
   const [consultationReason, setConsultationReason] = useState('General medical consultation');
   const [chatOpenSignal, setChatOpenSignal] = useState<number | null>(null);
   const [showChatLauncher, setShowChatLauncher] = useState(true);
+  const [scanRetryCountdown, setScanRetryCountdown] = useState(0);
   const featuredMedicines = medicines.filter((medicine) => FEATURED_MEDICINE_NAMES.includes(medicine.brand_name));
+
+  useEffect(() => {
+    if (scanRetryCountdown <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setScanRetryCountdown((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [scanRetryCountdown]);
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -321,13 +339,27 @@ const App: React.FC = () => {
   };
 
   const handleUpload = async (base64: string, mimeType = 'image/jpeg') => {
+    if (scanRetryCountdown > 0) {
+      setState((prev) => ({
+        ...prev,
+        view: 'error',
+        error: `Please wait before scanning again. Next retry in ${scanRetryCountdown} seconds.`,
+      }));
+      return;
+    }
+
     setState(prev => ({ ...prev, isAnalyzing: true, error: null, imagePreview: base64 }));
     
     try {
       const result = await analyzePrescriptionWithFallback(base64, mimeType);
+      setScanRetryCountdown(0);
       setState(prev => ({ ...prev, isAnalyzing: false, result, view: 'analysis' }));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Could not read prescription. Please use a clearer photo.';
+      const retrySeconds = parseRetryCountdownSeconds(message);
+      if (retrySeconds > 0) {
+        setScanRetryCountdown(retrySeconds);
+      }
       console.error(err);
       setState(prev => ({ ...prev, isAnalyzing: false, view: 'error', error: message }));
     }
@@ -442,6 +474,7 @@ const App: React.FC = () => {
   const setView = (v: ViewState) => setState(prev => ({ ...prev, view: v }));
 
   const reset = () => {
+    setScanRetryCountdown(0);
     setState(prev => ({
       ...prev,
       view: 'landing',
@@ -728,13 +761,17 @@ const App: React.FC = () => {
             </div>
             <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-4">Scan Failed</h2>
             <p className="text-slate-400 dark:text-slate-500 mb-12 font-medium leading-relaxed">{state.error}</p>
+            {scanRetryCountdown > 0 && (
+              <p className="-mt-8 mb-8 text-sm font-bold text-amber-600">Please wait before scanning again: {scanRetryCountdown}s</p>
+            )}
             <motion.button 
               onClick={reset}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.96 }}
-              className="bg-emerald-600 text-white px-16 py-5 rounded-[24px] font-black uppercase tracking-widest hover:bg-emerald-700 transition shadow-2xl shadow-emerald-200 dark:shadow-emerald-900/20"
+              disabled={scanRetryCountdown > 0}
+              className="bg-emerald-600 text-white px-16 py-5 rounded-[24px] font-black uppercase tracking-widest hover:bg-emerald-700 transition shadow-2xl shadow-emerald-200 dark:shadow-emerald-900/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Try Again
+              {scanRetryCountdown > 0 ? `Try Again in ${scanRetryCountdown}s` : 'Try Again'}
             </motion.button>
           </motion.div>
         )}
