@@ -64,6 +64,8 @@ npm install
 GEMINI_API_KEY=your_api_key_here
 ```
 
+If you deploy on Vercel, add the same value as a server-side environment variable named `GEMINI_API_KEY` and redeploy.
+
 4. Start the development server:
 
 ```bash

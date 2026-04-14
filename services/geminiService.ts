@@ -3,6 +3,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PrescriptionAnalysis } from "../types";
 import { medicines as catalogMedicines, Medicine as CatalogMedicine } from "../src/data/medicines";
 
+type GeminiAction = 'analyze' | 'ocr' | 'chat';
+
+interface GeminiProxyResponse<T> {
+  ok?: boolean;
+  data?: T;
+  error?: string;
+}
+
 interface GeminiErrorPayload {
   error?: {
     code?: number;
@@ -20,6 +28,30 @@ interface GeminiErrorPayload {
 const getGeminiApiKey = () => {
   const env = (import.meta as any).env;
   return env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || env.API_KEY || '';
+};
+
+const isBrowser = typeof window !== 'undefined' && typeof fetch !== 'undefined';
+
+const callGeminiProxy = async <T>(payload: Record<string, unknown>): Promise<T> => {
+  if (!isBrowser) {
+    throw new Error('Gemini proxy is only available in the browser.');
+  }
+
+  const response = await fetch('/api/gemini', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json().catch(() => null)) as GeminiProxyResponse<T> | null;
+
+  if (!response.ok || !data?.ok) {
+    throw new Error(data?.error || `Gemini proxy request failed (${response.status})`);
+  }
+
+  return data.data as T;
 };
 
 const normalizeText = (value: string): string =>
@@ -229,6 +261,16 @@ const isTransientGeminiError = (error: unknown): boolean => {
 };
 
 export const analyzePrescription = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
+  try {
+    return await callGeminiProxy<PrescriptionAnalysis>({
+      action: 'analyze' satisfies GeminiAction,
+      base64Image,
+      mimeType,
+    });
+  } catch (proxyError) {
+    console.warn('[Gemini proxy analyze fallback]', proxyError);
+  }
+
   const apiKey = getGeminiApiKey();
 
   if (!apiKey) {
@@ -349,6 +391,16 @@ export const chatWithPharmaBot = async (
   userMessage: string,
   language: string
 ): Promise<{ reply: string; shouldEscalate: boolean }> => {
+  try {
+    return await callGeminiProxy<{ reply: string; shouldEscalate: boolean }>({
+      action: 'chat' satisfies GeminiAction,
+      userMessage,
+      language,
+    });
+  } catch (proxyError) {
+    console.warn('[Gemini proxy chat fallback]', proxyError);
+  }
+
   const apiKey = getGeminiApiKey();
   const fallbackReply = FALLBACKS[language] || FALLBACKS.en;
 
@@ -418,6 +470,16 @@ export const extractPrescriptionTextFromImage = async (
   base64Image: string,
   mimeType: string
 ): Promise<string> => {
+  try {
+    return await callGeminiProxy<string>({
+      action: 'ocr' satisfies GeminiAction,
+      base64Image,
+      mimeType,
+    });
+  } catch (proxyError) {
+    console.warn('[Gemini proxy OCR fallback]', proxyError);
+  }
+
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
     throw new Error('Add your Gemini API key in Vercel or .env as VITE_GEMINI_API_KEY or GEMINI_API_KEY, then redeploy or restart the app.');

@@ -33,6 +33,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 Notes:
 - `VITE_` prefixed keys are exposed to the frontend by Vite.
+- For Vercel deployments, also set `GEMINI_API_KEY` as a server-side environment variable so the OCR proxy route can use it safely.
 - Keep `.env.local` out of version control.
 
 ## 5. Start Development Server
