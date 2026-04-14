@@ -19,7 +19,7 @@ interface GeminiErrorPayload {
 
 const getGeminiApiKey = () => {
   const env = (import.meta as any).env;
-  return env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || '';
+  return env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || env.API_KEY || '';
 };
 
 const normalizeText = (value: string): string =>
@@ -105,11 +105,11 @@ const isAuthOrApiKeyError = (error: unknown): boolean =>
 
 const formatGeminiError = (error: unknown, fallbackMessage: string): string => {
   if (isQuotaOrRateLimitError(error)) {
-    return 'Mitra AI is currently at usage limit. Please retry in a minute. If this continues, update your Gemini API billing/quota settings.';
+    return 'Mitra AI is currently at usage limit. Please retry in a minute. If this continues, check your Gemini API quota and billing settings.';
   }
 
   if (isAuthOrApiKeyError(error)) {
-    return 'Gemini API access is not configured correctly. Check VITE_GEMINI_API_KEY and API permissions, then retry.';
+    return 'Gemini API access is not configured correctly. Check your Vercel environment variables for VITE_GEMINI_API_KEY or GEMINI_API_KEY, then redeploy and retry.';
   }
 
   if (isTransientGeminiError(error)) {
@@ -232,7 +232,7 @@ export const analyzePrescription = async (base64Image: string, mimeType = 'image
   const apiKey = getGeminiApiKey();
 
   if (!apiKey) {
-    throw new Error('Add your Gemini API key in .env as VITE_GEMINI_API_KEY and restart the app.');
+    throw new Error('Add your Gemini API key in Vercel or .env as VITE_GEMINI_API_KEY or GEMINI_API_KEY, then redeploy or restart the app.');
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -420,7 +420,7 @@ export const extractPrescriptionTextFromImage = async (
 ): Promise<string> => {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
-    throw new Error('Add your Gemini API key in .env as VITE_GEMINI_API_KEY and restart the app.');
+    throw new Error('Add your Gemini API key in Vercel or .env as VITE_GEMINI_API_KEY or GEMINI_API_KEY, then redeploy or restart the app.');
   }
 
   const ai = new GoogleGenAI({ apiKey });
