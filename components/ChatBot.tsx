@@ -167,6 +167,8 @@ const supportIntentPattern = /(issue with my order|order issue|order problem|pro
 const genericIntentPattern = /(generic|substitute|alternative|salt|equivalent|generic for|का generic|कौन सा generic)/i;
 const useIntentPattern = /(use|used for|works for|indication|kis kam|किस काम|किस लिए|use of|काम आती है)/i;
 const priceIntentPattern = /(price|cost|kitne ka|कितने का|rate|savings)/i;
+const greetingIntentPattern = /^(hi|hii+|hiii+|hey|hello|helo|namaste|good morning|good afternoon|good evening|mitra)$/i;
+const helpIntentPattern = /\b(help|assist|assistance|what can you do|options|menu|guide me|i want help)\b/i;
 const medicineQueryStopWords = new Set([
   'about',
   'any',
@@ -246,6 +248,11 @@ interface MedicineMatch {
   medicine: (typeof medicines)[number] & { searchText: string; tokens: string[] };
   score: number;
   isFuzzy: boolean;
+};
+
+const buildHelpReply = (quickActions: readonly string[]): string => {
+  const examples = quickActions.slice(0, 3).map((item) => `"${item}"`).join(', ');
+  return `I can help with medicine uses, generic alternatives, price comparisons, prescription upload, and order support. Try asking like: ${examples}.`;
 };
 
 const getSpeechLocale = (language: Language): string => {
@@ -386,14 +393,34 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
     const ranked = rankMedicineMatches(query);
     if (!ranked.length) return null;
 
-    const strictThreshold = queryTokens.length <= 1 ? 0.74 : 0.64;
+    const shortestTokenLength = queryTokens.length ? Math.min(...queryTokens.map((token) => token.length)) : 0;
+    const strictThreshold =
+      queryTokens.length <= 1
+        ? shortestTokenLength <= 4
+          ? 0.92
+          : shortestTokenLength <= 6
+            ? 0.8
+            : 0.74
+        : 0.64;
     return ranked[0].score >= strictThreshold ? ranked[0] : null;
   };
 
   const findClosestMedicine = (query: string): MedicineMatch | null => {
+    const queryTokens = tokenizeQuery(query);
     const ranked = rankMedicineMatches(query);
     if (!ranked.length) return null;
-    return ranked[0].score >= 0.5 ? ranked[0] : null;
+
+    const shortestTokenLength = queryTokens.length ? Math.min(...queryTokens.map((token) => token.length)) : 0;
+    const closestThreshold =
+      queryTokens.length <= 1
+        ? shortestTokenLength <= 4
+          ? 0.95
+          : shortestTokenLength <= 6
+            ? 0.86
+            : 0.72
+        : 0.58;
+
+    return ranked[0].score >= closestThreshold ? ranked[0] : null;
   };
 
   const createSupportTicket = async (issue: string): Promise<SupportTicketRecord> => {
@@ -463,6 +490,16 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
       if (supportIntentPattern.test(trimmed)) {
         pushMessage({ role: 'assistant', type: 'text', content: localeCopy.ticketPrompt });
         setAwaitingTicketDetails(true);
+        return;
+      }
+
+      if (greetingIntentPattern.test(normalize(trimmed))) {
+        pushMessage({ role: 'assistant', type: 'text', content: `Hello. ${buildHelpReply(localeCopy.quick)}` });
+        return;
+      }
+
+      if (helpIntentPattern.test(normalize(trimmed))) {
+        pushMessage({ role: 'assistant', type: 'text', content: buildHelpReply(localeCopy.quick) });
         return;
       }
 
