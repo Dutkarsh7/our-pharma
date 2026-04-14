@@ -167,8 +167,86 @@ const supportIntentPattern = /(issue with my order|order issue|order problem|pro
 const genericIntentPattern = /(generic|substitute|alternative|salt|equivalent|generic for|का generic|कौन सा generic)/i;
 const useIntentPattern = /(use|used for|works for|indication|kis kam|किस काम|किस लिए|use of|काम आती है)/i;
 const priceIntentPattern = /(price|cost|kitne ka|कितने का|rate|savings)/i;
+const medicineQueryStopWords = new Set([
+  'about',
+  'any',
+  'can',
+  'for',
+  'give',
+  'hello',
+  'help',
+  'i',
+  'is',
+  'know',
+  'medicine',
+  'me',
+  'my',
+  'of',
+  'on',
+  'please',
+  'support',
+  'tell',
+  'the',
+  'to',
+  'want',
+  'what',
+]);
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+ ]/gi, ' ').replace(/\s+/g, ' ').trim();
+
+const tokenizeQuery = (value: string): string[] =>
+  normalize(value)
+    .split(' ')
+    .filter((token) => token.length > 1 && !medicineQueryStopWords.has(token));
+
+const levenshteinDistance = (left: string, right: string): number => {
+  if (left === right) return 0;
+  if (!left.length) return right.length;
+  if (!right.length) return left.length;
+
+  const row = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= left.length; i += 1) {
+    let prevDiagonal = row[0];
+    row[0] = i;
+    for (let j = 1; j <= right.length; j += 1) {
+      const temp = row[j];
+      const substitutionCost = left[i - 1] === right[j - 1] ? 0 : 1;
+      row[j] = Math.min(
+        row[j] + 1,
+        row[j - 1] + 1,
+        prevDiagonal + substitutionCost
+      );
+      prevDiagonal = temp;
+    }
+  }
+
+  return row[right.length];
+};
+
+const tokenSimilarity = (queryToken: string, candidateToken: string): number => {
+  if (!queryToken || !candidateToken) return 0;
+  if (queryToken === candidateToken) return 1;
+
+  const minLength = Math.min(queryToken.length, candidateToken.length);
+  if (minLength >= 4 && (queryToken.startsWith(candidateToken) || candidateToken.startsWith(queryToken))) {
+    return 0.9;
+  }
+
+  if (queryToken.length >= 5 && candidateToken.length >= 5 && (queryToken.includes(candidateToken) || candidateToken.includes(queryToken))) {
+    return 0.84;
+  }
+
+  const distance = levenshteinDistance(queryToken, candidateToken);
+  const maxLength = Math.max(queryToken.length, candidateToken.length);
+  const similarity = 1 - distance / maxLength;
+  return similarity >= 0.5 ? similarity : 0;
+};
+
+interface MedicineMatch {
+  medicine: (typeof medicines)[number] & { searchText: string; tokens: string[] };
+  score: number;
+  isFuzzy: boolean;
+};
 
 const getSpeechLocale = (language: Language): string => {
   switch (language) {
@@ -210,6 +288,7 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
     () => medicines.map((medicine) => ({
       ...medicine,
       searchText: normalize(`${medicine.brand_name} ${medicine.generic_name} ${medicine.uses || medicine.health_issues || ''}`),
+      tokens: Array.from(new Set(tokenizeQuery(`${medicine.brand_name} ${medicine.generic_name}`))),
     })),
     []
   );
@@ -255,19 +334,66 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
     onClose?.();
   };
 
-  // Fuzzy/lenient medicine matching logic
-  const findMedicine = (query: string) => {
+  const rankMedicineMatches = (query: string): MedicineMatch[] => {
     const normalized = normalize(query);
-    // Fuzzy: match if input is included anywhere in brand or generic name
-    return (
-      catalog.find(
-        (medicine) =>
-          medicine.brand_name.toLowerCase().includes(normalized) ||
-          medicine.generic_name.toLowerCase().includes(normalized)
-      ) ||
-      // fallback: searchText includes input (for uses/indications)
-      catalog.find((medicine) => medicine.searchText.includes(normalized))
-    );
+    const queryTokens = tokenizeQuery(query);
+
+    if (!normalized || queryTokens.length === 0) {
+      return [];
+    }
+
+    const ranked = catalog
+      .map((medicine) => {
+        let score = 0;
+        let matchedTokens = 0;
+
+        if (medicine.searchText.includes(normalized) && normalized.length >= 4) {
+          score = Math.max(score, 0.98);
+        }
+
+        const tokenScores = queryTokens.map((queryToken) => {
+          const bestTokenScore = medicine.tokens.reduce((best, token) => Math.max(best, tokenSimilarity(queryToken, token)), 0);
+          if (bestTokenScore > 0) {
+            matchedTokens += 1;
+          }
+          return bestTokenScore;
+        });
+
+        const tokenAverage = tokenScores.reduce((sum, value) => sum + value, 0) / queryTokens.length;
+        score = Math.max(score, tokenAverage);
+
+        const coverage = matchedTokens / queryTokens.length;
+        if (coverage >= 0.75 && score >= 0.55) {
+          score += 0.08;
+        }
+        if (coverage === 1 && score >= 0.6) {
+          score += 0.05;
+        }
+
+        return {
+          medicine,
+          score: Math.min(1, score),
+          isFuzzy: tokenAverage < 0.95,
+        };
+      })
+      .sort((left, right) => right.score - left.score);
+
+    return ranked;
+  };
+
+  const findMedicine = (query: string): MedicineMatch | null => {
+    const queryTokens = tokenizeQuery(query);
+    const ranked = rankMedicineMatches(query);
+    if (!ranked.length) return null;
+
+    const strictThreshold = queryTokens.length <= 1 ? 0.74 : 0.64;
+    return ranked[0].score >= strictThreshold ? ranked[0] : null;
+  };
+
+  const findClosestMedicine = (query: string): MedicineMatch | null => {
+    const ranked = rankMedicineMatches(query);
+    if (!ranked.length) return null;
+    return ranked[0].score >= 0.5 ? ranked[0] : null;
   };
 
   const createSupportTicket = async (issue: string): Promise<SupportTicketRecord> => {
@@ -294,25 +420,28 @@ const ChatBot: React.FC<ChatBotProps> = ({ theme, language, openSignal, onClose 
   };
 
   const buildMedicineReply = (question: string): string | null => {
-    const medicine = findMedicine(question);
-    if (!medicine) return null;
+    const match = findMedicine(question) ?? findClosestMedicine(question);
+    if (!match) return null;
+
+    const medicine = match.medicine;
+    const assumptionPrefix = match.isFuzzy ? `Assuming you meant ${medicine.brand_name}: ` : '';
 
     const savings = Math.max(0, medicine.brand_price - medicine.generic_price);
     const discount = medicine.brand_price > 0 ? Math.round((savings / medicine.brand_price) * 100) : 0;
 
     if (genericIntentPattern.test(question)) {
-      return `${medicine.brand_name} uses the generic composition ${medicine.generic_name}. Generic price is ₹${medicine.generic_price}, compared with brand price ₹${medicine.brand_price}.`;
+      return `${assumptionPrefix}${medicine.brand_name} uses the generic composition ${medicine.generic_name}. Generic price is ₹${medicine.generic_price}, compared with brand price ₹${medicine.brand_price}.`;
     }
 
     if (useIntentPattern.test(question)) {
-      return `${medicine.brand_name} is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. The active composition is ${medicine.generic_name}.`;
+      return `${assumptionPrefix}${medicine.brand_name} is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. The active composition is ${medicine.generic_name}.`;
     }
 
     if (priceIntentPattern.test(question)) {
-      return `${medicine.brand_name}: brand ₹${medicine.brand_price}, generic ₹${medicine.generic_price}. Estimated savings are ₹${savings} which is about ${discount}% lower.`;
+      return `${assumptionPrefix}${medicine.brand_name}: brand ₹${medicine.brand_price}, generic ₹${medicine.generic_price}. Estimated savings are ₹${savings} which is about ${discount}% lower.`;
     }
 
-    return `${medicine.brand_name} contains ${medicine.generic_name}. It is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. Generic option is ₹${medicine.generic_price}.`;
+    return `${assumptionPrefix}${medicine.brand_name} contains ${medicine.generic_name}. It is commonly used for ${medicine.uses || medicine.health_issues || 'its listed indications'}. Generic option is ₹${medicine.generic_price}.`;
   };
 
   const generateReply = async (message: string): Promise<void> => {
