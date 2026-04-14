@@ -3,6 +3,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PrescriptionAnalysis } from "../types";
 import { medicines as catalogMedicines, Medicine as CatalogMedicine } from "../src/data/medicines";
 
+interface GeminiErrorPayload {
+  error?: {
+    code?: number;
+    message?: string;
+    status?: string;
+  };
+}
+
 const getGeminiApiKey = () => {
   const env = (import.meta as any).env;
   return env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || '';
@@ -14,6 +22,50 @@ const normalizeText = (value: string): string =>
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+
+const parseGeminiErrorPayload = (message: string): GeminiErrorPayload | null => {
+  const trimmed = message.trim();
+  if (!trimmed.startsWith('{')) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(trimmed) as GeminiErrorPayload;
+  } catch {
+    return null;
+  }
+};
+
+const getErrorText = (error: unknown): string => {
+  if (error instanceof Error) {
+    const payload = parseGeminiErrorPayload(error.message);
+    return payload?.error?.message || error.message;
+  }
+
+  return String(error || 'Unknown error');
+};
+
+const isQuotaOrRateLimitError = (error: unknown): boolean =>
+  /429|resource_exhausted|quota exceeded|rate limit|too many requests|free_tier|retry/i.test(getErrorText(error));
+
+const isAuthOrApiKeyError = (error: unknown): boolean =>
+  /401|403|unauthorized|forbidden|api key|permission denied|invalid api key/i.test(getErrorText(error));
+
+const formatGeminiError = (error: unknown, fallbackMessage: string): string => {
+  if (isQuotaOrRateLimitError(error)) {
+    return 'Mitra AI is currently at usage limit. Please retry in a minute. If this continues, update your Gemini API billing/quota settings.';
+  }
+
+  if (isAuthOrApiKeyError(error)) {
+    return 'Gemini API access is not configured correctly. Check VITE_GEMINI_API_KEY and API permissions, then retry.';
+  }
+
+  if (isTransientGeminiError(error)) {
+    return 'Mitra AI is temporarily unavailable. Please retry in a minute.';
+  }
+
+  return fallbackMessage;
+};
 
 const scoreMedicineMatch = (haystack: string, candidate: CatalogMedicine): number => {
   const brand = normalizeText(candidate.brand_name);
@@ -121,9 +173,7 @@ const buildFallbackAnalysis = (ocrText: string): PrescriptionAnalysis => {
 };
 
 const isTransientGeminiError = (error: unknown): boolean => {
-  if (!(error instanceof Error)) return false;
-
-  return /503|unavailable|high demand|temporarily|overloaded|try again later/i.test(error.message);
+  return /503|unavailable|high demand|temporarily|overloaded|try again later/i.test(getErrorText(error));
 };
 
 export const analyzePrescription = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
@@ -154,58 +204,62 @@ export const analyzePrescription = async (base64Image: string, mimeType = 'image
     - detectedCondition: Main health issue (e.g., Hypertension, Viral Infection).
   `;
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: {
-      parts: [
-        { inlineData: { mimeType, data: base64Image } },
-        { text: prompt }
-      ]
-    },
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          medicines: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                originalName: { type: Type.STRING },
-                activeSalt: { type: Type.STRING },
-                strength: { type: Type.STRING },
-                manufacturer: { type: Type.STRING },
-                brandedPrice: { type: Type.NUMBER },
-                genericPrice: { type: Type.NUMBER },
-                genericBrandName: { type: Type.STRING },
-                tabletCount: { type: Type.INTEGER },
-                availability: { type: Type.STRING },
-                deliveryTime: { type: Type.STRING },
-                savingsPercentage: { type: Type.NUMBER },
-                savingsAmount: { type: Type.NUMBER },
-                monthlySavings: { type: Type.NUMBER },
-                benefits: { type: Type.ARRAY, items: { type: Type.STRING } },
-                uses: { type: Type.STRING },
-                drugClass: { type: Type.STRING },
-                category: { type: Type.STRING }
+  try {
+    const response = await ai.models.generateContent({
+      model,
+      contents: {
+        parts: [
+          { inlineData: { mimeType, data: base64Image } },
+          { text: prompt }
+        ]
+      },
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            medicines: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  originalName: { type: Type.STRING },
+                  activeSalt: { type: Type.STRING },
+                  strength: { type: Type.STRING },
+                  manufacturer: { type: Type.STRING },
+                  brandedPrice: { type: Type.NUMBER },
+                  genericPrice: { type: Type.NUMBER },
+                  genericBrandName: { type: Type.STRING },
+                  tabletCount: { type: Type.INTEGER },
+                  availability: { type: Type.STRING },
+                  deliveryTime: { type: Type.STRING },
+                  savingsPercentage: { type: Type.NUMBER },
+                  savingsAmount: { type: Type.NUMBER },
+                  monthlySavings: { type: Type.NUMBER },
+                  benefits: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  uses: { type: Type.STRING },
+                  drugClass: { type: Type.STRING },
+                  category: { type: Type.STRING }
+                }
               }
-            }
+            },
+            totalBrandedCost: { type: Type.NUMBER },
+            totalGenericCost: { type: Type.NUMBER },
+            totalSavings: { type: Type.NUMBER },
+            monthlySavingsTotal: { type: Type.NUMBER },
+            patientAdvice: { type: Type.STRING },
+            detectedCondition: { type: Type.STRING }
           },
-          totalBrandedCost: { type: Type.NUMBER },
-          totalGenericCost: { type: Type.NUMBER },
-          totalSavings: { type: Type.NUMBER },
-          monthlySavingsTotal: { type: Type.NUMBER },
-          patientAdvice: { type: Type.STRING },
-          detectedCondition: { type: Type.STRING }
-        },
-        required: ['medicines', 'totalBrandedCost', 'totalGenericCost', 'totalSavings', 'monthlySavingsTotal', 'patientAdvice']
+          required: ['medicines', 'totalBrandedCost', 'totalGenericCost', 'totalSavings', 'monthlySavingsTotal', 'patientAdvice']
+        }
       }
-    }
-  });
+    });
 
-  if (!response.text) throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
-  return JSON.parse(response.text.trim());
+    if (!response.text) throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
+    return JSON.parse(response.text.trim());
+  } catch (error) {
+    throw new Error(formatGeminiError(error, 'Could not analyze prescription right now. Please retry with a clearer image.'));
+  }
 };
 
 export const analyzePrescriptionWithFallback = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
@@ -216,11 +270,7 @@ export const analyzePrescriptionWithFallback = async (base64Image: string, mimeT
       const ocrText = await extractPrescriptionTextFromImage(base64Image, mimeType);
       return buildFallbackAnalysis(ocrText);
     } catch {
-      if (isTransientGeminiError(error)) {
-        throw new Error('Scan service is temporarily unavailable. Please try again in a minute with a clearer image.');
-      }
-
-      throw error;
+      throw new Error(formatGeminiError(error, 'Scan service is temporarily unavailable. Please try again in a minute with a clearer image.'));
     }
   }
 };
@@ -305,7 +355,10 @@ Reply now in ${respondIn}:`;
     return { reply, shouldEscalate: shouldEscalate || escalationFromReply };
   } catch (err) {
     console.error('[ChatBot Gemini error]', err);
-    return { reply: fallbackReply, shouldEscalate: true };
+    const errorAwareReply = isQuotaOrRateLimitError(err)
+      ? 'Mitra AI is currently busy due to usage limits. Please retry shortly, or I can connect you to support at +91 7827664217.'
+      : fallbackReply;
+    return { reply: errorAwareReply, shouldEscalate: true };
   }
 };
 
@@ -323,20 +376,24 @@ export const extractPrescriptionTextFromImage = async (
 Extract all medicine names, dosages, and instructions.
 List them clearly.`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
-    contents: {
-      parts: [
-        { text: prompt },
-        { inlineData: { data: base64Image, mimeType } }
-      ]
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: {
+        parts: [
+          { text: prompt },
+          { inlineData: { data: base64Image, mimeType } }
+        ]
+      }
+    });
+
+    const text = (response.text || '').trim();
+    if (!text) {
+      throw new Error('Could not extract readable text from this image.');
     }
-  });
 
-  const text = (response.text || '').trim();
-  if (!text) {
-    throw new Error('Could not extract readable text from this image.');
+    return text;
+  } catch (error) {
+    throw new Error(formatGeminiError(error, 'Could not read this prescription image. Please retry with better lighting and focus.'));
   }
-
-  return text;
 };
