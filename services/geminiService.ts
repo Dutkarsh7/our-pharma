@@ -33,6 +33,49 @@ const getGeminiApiKey = () => {
 const isBrowser = typeof window !== 'undefined' && typeof fetch !== 'undefined';
 const isViteDev = typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.DEV);
 
+const GEMINI_ANALYZE_MODEL = 'gemini-2.0-flash';
+const GEMINI_OCR_MODEL = 'gemini-2.0-flash';
+const GEMINI_CHAT_MODEL = 'gemini-2.0-flash';
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getErrorText = (error: unknown): string => {
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return 'Unknown error';
+  }
+};
+
+const isRetryableGeminiError = (error: unknown): boolean =>
+  /429|503|resource_exhausted|quota exceeded|rate limit|too many requests|free_tier|retry|unavailable|overloaded|temporarily/i.test(getErrorText(error));
+
+const withRetry = async <T>(operation: () => Promise<T>, label: string, maxAttempts = 3): Promise<T> => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      if (attempt > 1) {
+        console.warn(`[Gemini ${label}] retry attempt ${attempt}/${maxAttempts}`);
+      }
+
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableGeminiError(error) || attempt === maxAttempts) {
+        break;
+      }
+
+      await sleep(500 * 2 ** (attempt - 1));
+    }
+  }
+
+  throw lastError;
+};
+
 const callGeminiProxy = async <T>(payload: Record<string, unknown>): Promise<T> => {
   if (!isBrowser) {
     throw new Error('Gemini proxy is only available in the browser.');
@@ -53,6 +96,30 @@ const callGeminiProxy = async <T>(payload: Record<string, unknown>): Promise<T> 
   }
 
   return data.data as T;
+};
+
+let geminiProxyQueue: Promise<void> = Promise.resolve();
+
+const queueGeminiProxyCall = async <T>(payload: Record<string, unknown>): Promise<T> => {
+  let resolveTask: (value: T | PromiseLike<T>) => void = () => undefined;
+  let rejectTask: (reason?: unknown) => void = () => undefined;
+
+  const task = new Promise<T>((resolve, reject) => {
+    resolveTask = resolve;
+    rejectTask = reject;
+  });
+
+  geminiProxyQueue = geminiProxyQueue
+    .catch(() => undefined)
+    .then(async () => {
+      try {
+        resolveTask(await callGeminiProxy<T>(payload));
+      } catch (error) {
+        rejectTask(error);
+      }
+    });
+
+  return task;
 };
 
 const normalizeText = (value: string): string =>
@@ -114,20 +181,6 @@ const extractNestedErrorText = (value: unknown): string => {
   }
 
   return String(value);
-};
-
-const getErrorText = (error: unknown): string => {
-  if (typeof error === 'string') {
-    const payload = parseGeminiErrorPayload(error);
-    return payload?.error?.message || error;
-  }
-
-  if (error instanceof Error) {
-    const payload = parseGeminiErrorPayload(error.message);
-    return payload?.error?.message || extractNestedErrorText(error);
-  }
-
-  return extractNestedErrorText(error) || 'Unknown error';
 };
 
 const isQuotaOrRateLimitError = (error: unknown): boolean =>
@@ -264,7 +317,7 @@ const isTransientGeminiError = (error: unknown): boolean => {
 export const analyzePrescription = async (base64Image: string, mimeType = 'image/jpeg'): Promise<PrescriptionAnalysis> => {
   if (isBrowser) {
     try {
-      return await callGeminiProxy<PrescriptionAnalysis>({
+      return await queueGeminiProxyCall<PrescriptionAnalysis>({
         action: 'analyze' satisfies GeminiAction,
         base64Image,
         mimeType,
@@ -284,7 +337,7 @@ export const analyzePrescription = async (base64Image: string, mimeType = 'image
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const model = 'gemini-2.0-flash';
+  const model = GEMINI_ANALYZE_MODEL;
   
   const prompt = `
     Act as a senior clinical pharmacist. Analyze this prescription image with extreme precision.
@@ -305,7 +358,7 @@ export const analyzePrescription = async (base64Image: string, mimeType = 'image
   `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
       model,
       contents: {
         parts: [
@@ -353,7 +406,7 @@ export const analyzePrescription = async (base64Image: string, mimeType = 'image
           required: ['medicines', 'totalBrandedCost', 'totalGenericCost', 'totalSavings', 'monthlySavingsTotal', 'patientAdvice']
         }
       }
-    });
+    }), 'analyze');
 
     if (!response.text) throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
     return JSON.parse(response.text.trim());
@@ -457,10 +510,10 @@ User message: ${userMessage}
 
 Reply now in ${respondIn}:`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+    const response = await withRetry(() => ai.models.generateContent({
+      model: GEMINI_CHAT_MODEL,
       contents: { parts: [{ text: prompt }] }
-    });
+    }), 'chat');
     const reply = (response.text || '').trim()
       || (FALLBACKS[language] || FALLBACKS.en);
 
@@ -486,7 +539,7 @@ export const extractPrescriptionTextFromImage = async (
 ): Promise<string> => {
   if (isBrowser) {
     try {
-      return await callGeminiProxy<string>({
+      return await queueGeminiProxyCall<string>({
         action: 'ocr' satisfies GeminiAction,
         base64Image,
         mimeType,
@@ -510,15 +563,15 @@ Extract all medicine names, dosages, and instructions.
 List them clearly.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await withRetry(() => ai.models.generateContent({
+      model: GEMINI_OCR_MODEL,
       contents: {
         parts: [
           { text: prompt },
           { inlineData: { data: base64Image, mimeType } }
         ]
       }
-    });
+    }), 'ocr');
 
     const text = (response.text || '').trim();
     if (!text) {

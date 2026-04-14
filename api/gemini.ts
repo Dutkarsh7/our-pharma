@@ -2,6 +2,23 @@ import { GoogleGenAI, Type } from '@google/genai';
 
 const getGeminiApiKey = () => process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '';
 
+const GEMINI_ANALYZE_MODEL = 'gemini-2.0-flash';
+const GEMINI_OCR_MODEL = 'gemini-2.0-flash';
+const GEMINI_CHAT_MODEL = 'gemini-2.0-flash';
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getErrorText = (error: unknown): string => {
+  if (typeof error === 'string') return error;
+  if (error instanceof Error) return error.message;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return 'Unknown error';
+  }
+};
+
 const normalizeText = (value: string): string =>
   value
     .toLowerCase()
@@ -17,6 +34,35 @@ const isAuthOrApiKeyError = (errorText: string): boolean =>
 
 const isTransientGeminiError = (errorText: string): boolean =>
   /503|unavailable|high demand|temporarily|overloaded|try again later/i.test(errorText);
+
+const isRetryableGeminiError = (errorText: string): boolean =>
+  isQuotaOrRateLimitError(errorText) || isTransientGeminiError(errorText);
+
+const withRetry = async <T>(operation: () => Promise<T>, label: string, maxAttempts = 3): Promise<T> => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      if (attempt > 1) {
+        console.warn(`[Gemini proxy] retrying ${label}; attempt ${attempt}/${maxAttempts}`);
+      }
+
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      const errorText = getErrorText(error);
+
+      if (!isRetryableGeminiError(errorText) || attempt === maxAttempts) {
+        break;
+      }
+
+      const backoffMs = 500 * 2 ** (attempt - 1);
+      await sleep(backoffMs);
+    }
+  }
+
+  throw lastError;
+};
 
 const formatGeminiError = (error: unknown, fallbackMessage: string): string => {
   const text = error instanceof Error ? error.message : typeof error === 'string' ? error : JSON.stringify(error || {});
@@ -109,8 +155,8 @@ const handleAnalyze = async (base64Image: string, mimeType: string) => {
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+  const response = await withRetry(() => ai.models.generateContent({
+    model: GEMINI_ANALYZE_MODEL,
     contents: {
       parts: [
         { inlineData: { mimeType, data: base64Image } },
@@ -133,7 +179,7 @@ const handleAnalyze = async (base64Image: string, mimeType: string) => {
         required: ['medicines', 'totalBrandedCost', 'totalGenericCost', 'totalSavings', 'monthlySavingsTotal', 'patientAdvice'],
       },
     },
-  });
+  }), 'analyze');
 
   if (!response.text) {
     throw new Error('Analysis failed. Please ensure the prescription is well-lit and readable.');
@@ -149,15 +195,15 @@ const handleOcr = async (base64Image: string, mimeType: string) => {
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+  const response = await withRetry(() => ai.models.generateContent({
+    model: GEMINI_OCR_MODEL,
     contents: {
       parts: [
         { text: promptForOcr },
         { inlineData: { data: base64Image, mimeType } },
       ],
     },
-  });
+  }), 'ocr');
 
   const text = (response.text || '').trim();
   if (!text) {
@@ -208,10 +254,10 @@ User message: ${userMessage}
 
 Reply now in ${respondIn}:`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+  const response = await withRetry(() => ai.models.generateContent({
+    model: GEMINI_CHAT_MODEL,
     contents: { parts: [{ text: prompt }] },
-  });
+  }), 'chat');
 
   const reply = (response.text || '').trim() || fallbackReply;
   const escalationFromReply = [
@@ -232,6 +278,7 @@ export default async function handler(req: any, res: any) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const action = body.action as string;
+    console.info('[Gemini proxy] action:', action);
 
     if (action === 'analyze') {
       const data = await handleAnalyze(body.base64Image, body.mimeType || 'image/jpeg');
@@ -250,6 +297,7 @@ export default async function handler(req: any, res: any) {
 
     return res.status(400).json({ ok: false, error: 'Unknown Gemini action' });
   } catch (error) {
+    console.error('[Gemini proxy] error:', getErrorText(error));
     return res.status(500).json({
       ok: false,
       error: formatGeminiError(error, normalizeErrorText(error) || 'Gemini request failed.'),
